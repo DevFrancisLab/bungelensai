@@ -1,0 +1,5 @@
+node_modules/
+node_modules/.ignored
+dist/
+.vite/
+pnpm-lock.yaml
