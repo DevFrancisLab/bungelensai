@@ -8,7 +8,7 @@ export default function HeroSection() {
       {/* Background Image with Overlay */}
       <div className="absolute inset-0 z-0">
         <img
-          src="/parliament-hero.jpg"
+          src="/Kenyan_Parliament.jpeg"
           alt="Kenyan Parliament Building"
           className="w-full h-full object-cover object-center absolute inset-0"
         />
