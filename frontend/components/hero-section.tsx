@@ -34,16 +34,9 @@ export default function HeroSection() {
           </p>
 
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex justify-center">
             <Button size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90 rounded-full px-8 text-base font-semibold">
               Try BungeLens
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="bg-white/10 text-white border-white/30 hover:bg-white/20 rounded-full px-8 text-base font-semibold"
-            >
-              View Demo
             </Button>
           </div>
         </div>
