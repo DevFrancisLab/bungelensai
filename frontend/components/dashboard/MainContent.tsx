@@ -36,6 +36,7 @@ const initialMessages: Message[] = [
 export default function MainContent() {
   const [messages, setMessages] = useState<Message[]>(initialMessages)
   const containerRef = useRef<HTMLDivElement | null>(null)
+  const [suggestion, setSuggestion] = useState<string | undefined>(undefined)
 
   useEffect(() => {
     const el = containerRef.current
@@ -77,6 +78,27 @@ export default function MainContent() {
         <p className="text-muted-foreground mt-1">What would you like to understand today?</p>
       </section>
 
+      {/* Suggestion cards */}
+      <section>
+        <div className="flex flex-wrap gap-3">
+          {[
+            'What was discussed about healthcare?',
+            "Summarize today's proceedings.",
+            'Explain the Finance Bill.',
+            'What policies affect young people?'
+          ].map((s) => (
+            <button
+              key={s}
+              onClick={() => setSuggestion(s)}
+              className="bg-accent/5 hover:bg-accent/10 transition-colors rounded-lg px-4 py-2 text-sm font-medium shadow-sm hover:shadow-md"
+              aria-label={`Use suggestion: ${s}`}
+            >
+              {s}
+            </button>
+          ))}
+        </div>
+      </section>
+
       <section>
         <Card>
           <div className="flex flex-col" style={{ minHeight: 420 }}>
@@ -95,7 +117,7 @@ export default function MainContent() {
             </div>
 
             <div className="border-t px-4 py-3 bg-background/60">
-              <ChatInput onSend={handleSend} />
+              <ChatInput onSend={handleSend} suggestion={suggestion} />
             </div>
           </div>
         </Card>
