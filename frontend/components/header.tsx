@@ -1,8 +1,11 @@
- 'use client'
+'use client'
 
 import { Button } from '@/components/ui/button'
+import { useAuthModal } from '@/context/auth-context'
 
 export default function Header() {
+  const { open } = useAuthModal()
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
       <nav className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -16,10 +19,10 @@ export default function Header() {
 
         {/* CTA Buttons */}
         <div className="flex items-center gap-3">
-          <Button variant="ghost" className="text-foreground hover:bg-muted">
+          <Button variant="ghost" className="text-foreground hover:bg-muted" onClick={open} aria-haspopup="dialog">
             Sign In
           </Button>
-          <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
+          <Button className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={open} aria-haspopup="dialog">
             Try BungeLens
           </Button>
         </div>

@@ -1,8 +1,10 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
+import { useAuthModal } from '@/context/auth-context'
 
 export default function CTASection() {
+  const { open } = useAuthModal()
   return (
     <section className="py-20 px-6 bg-card">
       <div className="max-w-4xl mx-auto">
@@ -26,7 +28,7 @@ export default function CTASection() {
           </p>
 
           {/* Button */}
-          <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-10 text-base font-semibold">
+          <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-10 text-base font-semibold shadow-sm hover:shadow-md transition-shadow focus-visible:ring-2" onClick={open} aria-haspopup="dialog">
             Get Started
           </Button>
 

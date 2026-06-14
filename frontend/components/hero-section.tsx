@@ -1,8 +1,10 @@
  'use client'
 
 import { Button } from '@/components/ui/button'
+import { useAuthModal } from '@/context/auth-context'
 
 export default function HeroSection() {
+  const { open } = useAuthModal()
   return (
     <section className="relative min-h-screen w-full pt-20 flex items-center justify-center overflow-hidden">
       {/* Background Image with Overlay */}
@@ -35,7 +37,7 @@ export default function HeroSection() {
 
           {/* CTA Buttons */}
           <div className="flex justify-center">
-            <Button size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90 rounded-full px-8 text-base font-semibold">
+            <Button size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90 rounded-full px-8 text-base font-semibold shadow-sm hover:shadow-md transition-shadow focus-visible:ring-2" onClick={open} aria-haspopup="dialog">
               Try BungeLens
             </Button>
           </div>
