@@ -10,7 +10,7 @@ import { Card } from '@/components/ui/card'
 
 type Message =
   | { id: string; role: 'user'; text: string }
-  | { id: string; role: 'assistant'; aiResponse: { summary: string; keyInsights: string[]; citizenImpact: string; tags: string[] } }
+  | { id: string; role: 'assistant'; typing?: boolean; aiResponse?: { summary: string; keyInsights: string[]; citizenImpact: string; tags: string[] } }
 
 const initialMessages: Message[] = [
   {
@@ -72,27 +72,90 @@ export default function MainContent() {
   function handleSend(text: string) {
     const userMessage: Message = { id: String(Date.now()), role: 'user', text }
     setMessages((m) => [...m, userMessage])
+    // append a typing indicator message
+    const typingId = 'typing-' + Date.now()
+    const typingMessage: Message = { id: typingId, role: 'assistant', typing: true }
+    setMessages((m) => [...m, typingMessage])
 
-    // simulate AI response using mock parliamentary data
+    // generate a realistic, keyword-based mock response
+    const query = text.toLowerCase()
+    const responseDelay = 700 + Math.floor(Math.random() * 800)
+
     setTimeout(() => {
-      const aiResp: Message = {
-        id: String(Date.now() + 1),
-        role: 'assistant',
-        aiResponse: {
-          summary: 'The bill includes a 6% funding uplift with a targeted rural grant and stricter reporting requirements.',
-          keyInsights: [
-            '6% uplift to baseline allocation',
-            'New rural grant targets infrastructure and training',
-            'Quarterly reporting increases district accountability'
-          ],
-          citizenImpact:
-            'Expect improved resource allocation in rural schools; monitoring will track progress and disbursement over the next 12 months.',
-          tags: ['Education', 'Policy', 'Funding']
-        }
-      }
+      const aiResponse = generateMockResponse(query)
 
-      setMessages((m) => [...m, aiResp])
-    }, 700)
+      // replace typing message with actual response
+      setMessages((m) => m.map((msg) => (msg.id === typingId ? { id: String(Date.now()), role: 'assistant', aiResponse } : msg)))
+    }, responseDelay)
+  }
+
+
+  function generateMockResponse(query: string) {
+    // Default fallback
+    const fallback = {
+      summary: 'Summary: Key points and outcomes summarized from parliamentary records.',
+      keyInsights: [
+        'High-level overview of the debated measures',
+        'Stakeholder positions highlighted',
+        'Implementation timelines outlined by ministries'
+      ],
+      citizenImpact: 'Citizens can expect clearer timelines and targeted support measures where applicable.',
+      tags: ['Parliament', 'Policy']
+    }
+
+    if (/health|healthcare|hospital|medical/.test(query)) {
+      return {
+        summary: 'The healthcare policy discussion focused on funding models and phased rollout of universal coverage.',
+        keyInsights: [
+          'Proposed funding through reallocation of existing health budgets',
+          'Pilot rollout planned in three regions first',
+          'Emphasis on primary care and workforce training'
+        ],
+        citizenImpact: 'Improved access to primary care for underserved regions within 12–24 months; monitoring to follow.',
+        tags: ['Healthcare', 'Policy', 'Access']
+      }
+    }
+
+    if (/finance|budget|tax|revenue|fiscal/.test(query)) {
+      return {
+        summary: 'The Finance Bill proposes targeted tax changes and reallocations to support social programs.',
+        keyInsights: [
+          'Adjustments to tax brackets to increase revenue',
+          'New allocations for social safety nets',
+          'Measures to improve transparency of spending'
+        ],
+        citizenImpact: 'Some households may see marginal tax changes; social programs receive additional funding.',
+        tags: ['Finance', 'Budget', 'Tax']
+      }
+    }
+
+    if (/education|schools|students|universit/.test(query)) {
+      return {
+        summary: 'Education reforms emphasize increased baseline funding and targeted rural grants.',
+        keyInsights: [
+          '6% baseline funding increase proposed',
+          'Targeted grants for rural infrastructure and teacher training',
+          'New reporting for accountability at district level'
+        ],
+        citizenImpact: 'Rural students should experience gradual improvements in resources and teacher support.',
+        tags: ['Education', 'Funding', 'Rural']
+      }
+    }
+
+    if (/youth|young people|youth initiative|youth programs/.test(query)) {
+      return {
+        summary: 'Youth initiatives under discussion include employment programs and skills training.',
+        keyInsights: [
+          'Funding earmarked for youth employment schemes',
+          'Vocational training partnerships proposed',
+          'Monitoring frameworks for program outcomes'
+        ],
+        citizenImpact: 'Young people may gain access to new training and employment programs in pilot regions.',
+        tags: ['Youth', 'Employment', 'Skills']
+      }
+    }
+
+    return fallback
   }
 
   return (

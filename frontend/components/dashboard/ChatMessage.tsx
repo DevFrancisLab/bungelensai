@@ -17,16 +17,18 @@ export default function ChatMessage({
   role,
   text,
   aiResponse,
+  typing,
 }: {
   role: 'user' | 'assistant'
   text?: string
   aiResponse?: AIResponse
+  typing?: boolean
 }) {
   const isAssistant = role === 'assistant'
 
   return (
     <div className={cn('flex gap-3 items-start', isAssistant ? 'flex-row' : 'flex-row-reverse')}>
-      <div className="flex-shrink-0">
+      <div className="shrink-0">
         <Avatar>
           <AvatarFallback>{isAssistant ? 'BL' : 'YOU'}</AvatarFallback>
         </Avatar>
@@ -34,9 +36,19 @@ export default function ChatMessage({
 
       <div className="flex-1">
         <Card className={isAssistant ? 'bg-card' : 'bg-primary/5'}>
-          <div className={cn('px-4 py-3')}> 
+          <div className={cn('px-4 py-3')}>
+            {/* User text bubble */}
             {text && <p className={cn('text-sm', isAssistant ? 'text-muted-foreground' : 'text-foreground')}>{text}</p>}
 
+            {/* Typing indicator */}
+            {typing && (
+              <div className="mt-2 flex items-center gap-3">
+                <div className="size-4 animate-pulse rounded-full bg-muted-foreground/30" />
+                <div className="text-sm text-muted-foreground">BungeLens is typing…</div>
+              </div>
+            )}
+
+            {/* Structured AI response */}
             {aiResponse && (
               <div className="mt-3 space-y-3">
                 <div>
