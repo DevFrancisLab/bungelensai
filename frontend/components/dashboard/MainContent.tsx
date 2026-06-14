@@ -3,6 +3,9 @@
 import React, { useState, useRef, useEffect } from 'react'
 import ChatMessage from './ChatMessage'
 import ChatInput from './ChatInput'
+import UploadCard from './UploadCard'
+import DocumentCard from './DocumentCard'
+import { Spinner } from '@/components/ui/spinner'
 import { Card } from '@/components/ui/card'
 
 type Message =
@@ -37,6 +40,27 @@ export default function MainContent() {
   const [messages, setMessages] = useState<Message[]>(initialMessages)
   const containerRef = useRef<HTMLDivElement | null>(null)
   const [suggestion, setSuggestion] = useState<string | undefined>(undefined)
+  const [documents, setDocuments] = useState<Array<{ id: string; name: string; date: string; status: string; topics: string[] }>>([])
+
+  function handleFiles(files: File[]) {
+    // Add each file to documents with status 'Uploaded' then simulate processing and analysis
+    files.forEach((file) => {
+      const id = String(Date.now()) + '-' + file.name
+      const doc = { id, name: file.name, date: new Date().toLocaleString(), status: 'Uploaded', topics: [] }
+      setDocuments((d) => [doc, ...d])
+
+      // simulate processing
+      setTimeout(() => {
+        setDocuments((d) => d.map((x) => x.id === id ? { ...x, status: 'Processing' } : x))
+
+        // simulate AI analysis
+        setTimeout(() => {
+          const topics = ['Education', 'Budget', 'Healthcare'].slice(0, Math.max(1, Math.floor(Math.random() * 3)))
+          setDocuments((d) => d.map((x) => x.id === id ? { ...x, status: 'Complete', topics } : x))
+        }, 1200)
+      }, 600)
+    })
+  }
 
   useEffect(() => {
     const el = containerRef.current
@@ -99,7 +123,20 @@ export default function MainContent() {
         </div>
       </section>
 
-      <section>
+      <section className="space-y-4">
+        <UploadCard onFiles={handleFiles} />
+
+        <div className="grid grid-cols-1 gap-3">
+          {documents.length === 0 ? null : (
+            <div className="space-y-2">
+              {documents.map((doc) => (
+                <DocumentCard key={doc.id} doc={doc} />
+              ))}
+            </div>
+          )}
+
+        </div>
+
         <Card>
           <div className="flex flex-col" style={{ minHeight: 420 }}>
             <div ref={containerRef} className="overflow-auto px-4 py-4 space-y-4" style={{ maxHeight: '56vh' }}>
