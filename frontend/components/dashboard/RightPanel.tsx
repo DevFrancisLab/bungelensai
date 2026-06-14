@@ -2,36 +2,98 @@
 
 import React from 'react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { Bell, FileText } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+import { Home, FileText, BarChart2, Calendar, BookOpen, Heart, Leaf } from 'lucide-react'
 
 export default function RightPanel() {
   return (
     <aside className="w-full">
       <div className="space-y-4">
-        <Card>
+        {/* Trending in Parliament */}
+        <Card className="hover:shadow-lg transition-shadow duration-200">
           <CardHeader className="px-4 py-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <Bell />
-                <CardTitle>Notifications</CardTitle>
+                <Home />
+                <CardTitle>Trending in Parliament</CardTitle>
               </div>
-              <div className="text-sm text-muted-foreground">0</div>
+              <div className="text-sm text-muted-foreground">Live</div>
             </div>
           </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">No notifications — you'll see updates here.</p>
+          <CardContent className="space-y-3">
+            {[
+              { title: 'Finance Bill 2026', snippet: 'Key amendments to tax brackets and allocation.', icon: FileText },
+              { title: 'Universal Healthcare', snippet: 'Debate on funding model and rollout timeline.', icon: Heart },
+              { title: 'Education Reform', snippet: 'Discussions on funding and rural access.', icon: BookOpen },
+              { title: 'Agricultural Subsidies', snippet: 'Support measures for smallholder farmers.', icon: Leaf },
+            ].map((t) => (
+              <div key={t.title} className="flex items-start gap-3 p-2 rounded-md hover:bg-accent/5 transition-colors cursor-pointer">
+                <div className="w-10 h-10 rounded-md bg-accent/10 flex items-center justify-center text-accent-foreground">
+                  <t.icon className="size-4" />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between">
+                    <div className="font-medium">{t.title}</div>
+                    <Badge variant="outline">Trending</Badge>
+                  </div>
+                  <div className="text-sm text-muted-foreground mt-1">{t.snippet}</div>
+                </div>
+              </div>
+            ))}
           </CardContent>
         </Card>
 
-        <Card>
+        {/* Parliamentary Activity */}
+        <Card className="hover:shadow-lg transition-shadow duration-200">
           <CardHeader className="px-4 py-3">
             <div className="flex items-center gap-3">
-              <FileText />
-              <CardTitle>Recent Documents</CardTitle>
+              <BarChart2 />
+              <CardTitle>Parliamentary Activity</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">No uploaded documents yet.</p>
+            <div className="grid grid-cols-3 gap-3 text-center">
+              <div className="p-3 bg-background rounded-md">
+                <div className="text-2xl font-semibold">24</div>
+                <div className="text-sm text-muted-foreground">Bills Discussed</div>
+              </div>
+              <div className="p-3 bg-background rounded-md">
+                <div className="text-2xl font-semibold">6</div>
+                <div className="text-sm text-muted-foreground">Committees Active</div>
+              </div>
+              <div className="p-3 bg-background rounded-md">
+                <div className="text-2xl font-semibold">112</div>
+                <div className="text-sm text-muted-foreground">Questions Raised</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Recent Discussions */}
+        <Card className="hover:shadow-lg transition-shadow duration-200">
+          <CardHeader className="px-4 py-3">
+            <div className="flex items-center gap-3">
+              <Calendar />
+              <CardTitle>Recent Discussions</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {[
+                { time: '2h ago', title: 'Committee on Finance debated tax relief measures', excerpt: 'Members discussed adjusting thresholds for small businesses.' },
+                { time: '5h ago', title: 'Health committee hearing on Universal Healthcare rollout', excerpt: 'Panel outlined phased implementation and budgeting.' },
+                { time: '1d ago', title: 'Education reform public submissions reviewed', excerpt: 'Stakeholders called for increased rural funding.' },
+              ].map((d) => (
+                <div key={d.title} className="flex items-start gap-3 group">
+                  <div className="w-2.5 h-2.5 rounded-full mt-2 bg-accent/80 group-hover:scale-110 transition-transform" />
+                  <div>
+                    <div className="text-sm font-medium">{d.title}</div>
+                    <div className="text-xs text-muted-foreground mt-1">{d.excerpt}</div>
+                    <div className="text-xs text-muted-foreground mt-1">{d.time}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </CardContent>
         </Card>
       </div>
