@@ -1,13 +1,29 @@
 'use client'
 
+import React, { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { useAuthModal } from '@/context/auth-context'
 
 export default function Header() {
   const { open } = useAuthModal()
+  // Avoid importing `next/navigation` under Vite; determine pathname from window
+  const [scrolled, setScrolled] = useState<boolean>(false)
+
+  useEffect(() => {
+    const isLanding = typeof window !== 'undefined' && (window.location.pathname === '/' || window.location.pathname === '')
+    if (!isLanding) {
+      setScrolled(true)
+      return
+    }
+
+    const onScroll = () => setScrolled(window.scrollY > 24)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
+    <header className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-200 ${scrolled ? 'bg-background/80 backdrop-blur-md border-b border-border' : 'bg-transparent'}`}>
       <nav className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         {/* Logo */}
         <div className="flex items-center gap-2">
