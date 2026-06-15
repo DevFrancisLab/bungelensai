@@ -9,6 +9,7 @@ export type SectionKey = 'dashboard' | 'trending' | 'upload' | 'saved' | 'settin
 
 export default function Dashboard() {
   const [activeSection, setActiveSection] = useState<SectionKey>('dashboard')
+  const [collapsed, setCollapsed] = useState<boolean>(false)
 
   return (
     <main className="min-h-screen bg-background text-foreground">
@@ -34,19 +35,19 @@ export default function Dashboard() {
       </header>
 
       <section className="max-w-7xl mx-auto px-6 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 min-h-[calc(100vh-5rem)]">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 min-h-[calc(100vh-5rem)] transition-all duration-200 ease-in-out">
           {/* Left sidebar */}
-          <div className="lg:col-span-3">
-            <Sidebar activeSection={activeSection} onSelect={setActiveSection} />
+          <div className={`lg:col-span-3 ${collapsed ? 'lg:col-span-2' : ''}`}>
+            <Sidebar activeSection={activeSection} onSelect={setActiveSection} collapsed={collapsed} setCollapsed={setCollapsed} />
           </div>
 
           {/* Main content area */}
-          <div className="lg:col-span-6">
+          <div className={`lg:col-span-6 ${collapsed ? 'lg:col-span-8' : ''}`}>
             <MainContent activeSection={activeSection} />
           </div>
 
           {/* Right insights panel */}
-          <div className="lg:col-span-3">
+          <div className={`lg:col-span-3 ${collapsed ? 'lg:col-span-2' : ''}`}>
             <RightPanel activeSection={activeSection} />
           </div>
         </div>

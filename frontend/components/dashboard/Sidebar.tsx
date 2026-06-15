@@ -8,10 +8,11 @@ import { Home, TrendingUp, Upload, Bookmark, Settings, ChevronLeft, ChevronRight
 type Props = {
   activeSection: 'dashboard' | 'trending' | 'upload' | 'saved' | 'settings'
   onSelect: (v: 'dashboard' | 'trending' | 'upload' | 'saved' | 'settings') => void
+  collapsed?: boolean
+  setCollapsed?: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-export default function Sidebar({ activeSection, onSelect }: Props) {
-  const [collapsed, setCollapsed] = useState(false)
+export default function Sidebar({ activeSection, onSelect, collapsed = false, setCollapsed }: Props) {
 
   return (
     <aside className={`lg:sticky lg:top-20 lg:self-start transition-all duration-200`}> 
@@ -36,7 +37,7 @@ export default function Sidebar({ activeSection, onSelect }: Props) {
 
             <button
               aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-              onClick={() => setCollapsed((s) => !s)}
+              onClick={() => setCollapsed && setCollapsed((s) => !s)}
               className="ml-2 rounded-full p-1 hover:bg-accent/5 transition-colors"
             >
               {collapsed ? <ChevronRight className="size-4" /> : <ChevronLeft className="size-4" />}
