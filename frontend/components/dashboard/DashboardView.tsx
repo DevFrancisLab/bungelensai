@@ -32,7 +32,9 @@ export default function DashboardView({
     <div className="transition-transform duration-200 opacity-100 translate-y-0">
       <section>
         <h2 className="text-2xl md:text-3xl font-semibold">Good afternoon <span aria-hidden>👋</span></h2>
-        <p className="text-muted-foreground mt-1 max-w-2xl">What would you like to understand today?</p>
+        <h3 className="text-2xl md:text-3xl font-semibold mt-2">Ask BungeLens AI</h3>
+        <p className="text-muted-foreground mt-1 max-w-2xl">Understand parliamentary discussions and policies in plain language.</p>
+        <p className="text-muted-foreground mt-3 max-w-2xl">What would you like to understand today?</p>
       </section>
 
       {/* Suggestion cards */}
