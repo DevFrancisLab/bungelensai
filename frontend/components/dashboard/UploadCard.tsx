@@ -37,7 +37,7 @@ export default function UploadCard({ onFiles }: { onFiles: (files: File[]) => vo
           onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
           onDragLeave={() => setDragOver(false)}
           onDrop={onDrop}
-          className={`w-full rounded-md border border-dashed p-6 text-center ${dragOver ? 'bg-accent/5' : 'bg-transparent'}`}
+          className={`w-full rounded-md border border-dashed p-6 text-center ${dragOver ? 'bg-accent/5' : 'bg-transparent'} transition-colors`}
         >
           <input ref={inputRef} type="file" className="hidden" multiple onChange={(e) => handleFiles(e.target.files)} accept=".pdf,application/pdf" />
 
@@ -52,6 +52,9 @@ export default function UploadCard({ onFiles }: { onFiles: (files: File[]) => vo
           <div className="mt-4">
             <Button variant="outline" onClick={onSelect} disabled={uploading}>Select files</Button>
           </div>
+
+          {/* subtle hint for users */}
+          <div className="mt-3 text-xs text-muted-foreground">We’ll extract summaries and topics for preview. Processing is simulated.</div>
         </div>
       </CardContent>
     </Card>

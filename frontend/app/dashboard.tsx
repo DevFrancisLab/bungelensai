@@ -1,11 +1,15 @@
 "use client"
 
-import React from 'react'
+import React, { useState } from 'react'
 import Sidebar from '@/components/dashboard/Sidebar'
 import MainContent from '@/components/dashboard/MainContent'
 import RightPanel from '@/components/dashboard/RightPanel'
 
+export type SectionKey = 'dashboard' | 'trending' | 'upload' | 'saved' | 'settings'
+
 export default function Dashboard() {
+  const [activeSection, setActiveSection] = useState<SectionKey>('dashboard')
+
   return (
     <main className="min-h-screen bg-background text-foreground">
       {/* Top nav */}
@@ -33,12 +37,12 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Left sidebar */}
           <div className="lg:col-span-3">
-            <Sidebar />
+            <Sidebar activeSection={activeSection} onSelect={setActiveSection} />
           </div>
 
           {/* Main content area */}
           <div className="lg:col-span-6">
-            <MainContent />
+            <MainContent activeSection={activeSection} />
           </div>
 
           {/* Right insights panel */}

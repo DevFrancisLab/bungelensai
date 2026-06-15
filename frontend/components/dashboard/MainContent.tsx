@@ -1,6 +1,11 @@
 "use client"
 
 import React, { useState, useRef, useEffect } from 'react'
+import TrendingTopicsView from './TrendingTopicsView'
+import SavedInsightsView from './SavedInsightsView'
+import SettingsView from './SettingsView'
+import DashboardView from './DashboardView'
+import UploadDocumentsView from './UploadDocumentsView'
 import ChatMessage from './ChatMessage'
 import ChatInput from './ChatInput'
 import UploadCard from './UploadCard'
@@ -36,11 +41,14 @@ const initialMessages: Message[] = [
   }
 ]
 
-export default function MainContent() {
+type SectionKey = 'dashboard' | 'trending' | 'upload' | 'saved' | 'settings'
+
+export default function MainContent({ activeSection = 'dashboard' }: { activeSection?: SectionKey }) {
   const [messages, setMessages] = useState<Message[]>(initialMessages)
   const containerRef = useRef<HTMLDivElement | null>(null)
   const [suggestion, setSuggestion] = useState<string | undefined>(undefined)
   const [documents, setDocuments] = useState<Array<{ id: string; name: string; date: string; status: string; topics: string[] }>>([])
+  const [viewVisible, setViewVisible] = useState(true)
 
   function handleFiles(files: File[]) {
     // Add each file to documents with status 'Uploaded' then simulate processing and analysis
@@ -88,6 +96,13 @@ export default function MainContent() {
       setMessages((m) => m.map((msg) => (msg.id === typingId ? { id: String(Date.now()), role: 'assistant', aiResponse } : msg)))
     }, responseDelay)
   }
+
+  // Small entrance animation when switching sections
+  useEffect(() => {
+    setViewVisible(false)
+    const t = setTimeout(() => setViewVisible(true), 20)
+    return () => clearTimeout(t)
+  }, [activeSection])
 
 
   function generateMockResponse(query: string) {
@@ -159,69 +174,49 @@ export default function MainContent() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <section>
-        <h2 className="text-2xl md:text-3xl font-semibold">Good afternoon <span aria-hidden>👋</span></h2>
-        <p className="text-muted-foreground mt-1">What would you like to understand today?</p>
-      </section>
+    <div className="relative" style={{ minHeight: 560 }}>
+      {/* Dashboard (assistant) */}
+      <div className={
+        `absolute inset-0 transition-all duration-200 ease-out transform ${activeSection === 'dashboard' ? 'opacity-100 translate-y-0 z-10' : 'opacity-0 -translate-y-2 pointer-events-none z-0'}`
+      } aria-hidden={activeSection !== 'dashboard'}>
+        <DashboardView
+          messages={messages}
+          containerRef={containerRef}
+          suggestion={suggestion}
+          setSuggestion={(s) => setSuggestion(s)}
+          handleSend={handleSend}
+          documents={documents}
+          handleFiles={handleFiles}
+        />
+      </div>
 
-      {/* Suggestion cards */}
-      <section>
-        <div className="flex flex-wrap gap-3">
-          {[
-            'What was discussed about healthcare?',
-            "Summarize today's proceedings.",
-            'Explain the Finance Bill.',
-            'What policies affect young people?'
-          ].map((s) => (
-            <button
-              key={s}
-              onClick={() => setSuggestion(s)}
-              className="bg-accent/5 hover:bg-accent/10 transition-colors rounded-lg px-4 py-2 text-sm font-medium shadow-sm hover:shadow-md"
-              aria-label={`Use suggestion: ${s}`}
-            >
-              {s}
-            </button>
-          ))}
-        </div>
-      </section>
+      {/* Trending */}
+      <div className={
+        `absolute inset-0 transition-all duration-200 ease-out transform ${activeSection === 'trending' ? 'opacity-100 translate-y-0 z-10' : 'opacity-0 -translate-y-2 pointer-events-none z-0'}`
+      } aria-hidden={activeSection !== 'trending'}>
+        <TrendingTopicsView />
+      </div>
 
-      <section className="space-y-4">
-        <UploadCard onFiles={handleFiles} />
+      {/* Upload */}
+      <div className={
+        `absolute inset-0 transition-all duration-200 ease-out transform ${activeSection === 'upload' ? 'opacity-100 translate-y-0 z-10' : 'opacity-0 -translate-y-2 pointer-events-none z-0'}`
+      } aria-hidden={activeSection !== 'upload'}>
+        <UploadDocumentsView documents={documents} handleFiles={handleFiles} />
+      </div>
 
-        <div className="grid grid-cols-1 gap-3">
-          {documents.length === 0 ? null : (
-            <div className="space-y-2">
-              {documents.map((doc) => (
-                <DocumentCard key={doc.id} doc={doc} />
-              ))}
-            </div>
-          )}
+      {/* Saved */}
+      <div className={
+        `absolute inset-0 transition-all duration-200 ease-out transform ${activeSection === 'saved' ? 'opacity-100 translate-y-0 z-10' : 'opacity-0 -translate-y-2 pointer-events-none z-0'}`
+      } aria-hidden={activeSection !== 'saved'}>
+        <SavedInsightsView />
+      </div>
 
-        </div>
-
-        <Card>
-          <div className="flex flex-col" style={{ minHeight: 420 }}>
-            <div ref={containerRef} className="overflow-auto px-4 py-4 space-y-4" style={{ maxHeight: '56vh' }}>
-              {messages.map((m) =>
-                m.role === 'user' ? (
-                  <ChatMessage key={m.id} role="user" text={m.text} />
-                ) : (
-                  <ChatMessage
-                    key={m.id}
-                    role="assistant"
-                    aiResponse={m.aiResponse}
-                  />
-                ),
-              )}
-            </div>
-
-            <div className="border-t px-4 py-3 bg-background/60">
-              <ChatInput onSend={handleSend} suggestion={suggestion} />
-            </div>
-          </div>
-        </Card>
-      </section>
+      {/* Settings */}
+      <div className={
+        `absolute inset-0 transition-all duration-200 ease-out transform ${activeSection === 'settings' ? 'opacity-100 translate-y-0 z-10' : 'opacity-0 -translate-y-2 pointer-events-none z-0'}`
+      } aria-hidden={activeSection !== 'settings'}>
+        <SettingsView />
+      </div>
     </div>
   )
 }

@@ -5,10 +5,15 @@ import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Home, TrendingUp, Upload, Bookmark, Settings } from 'lucide-react'
 
-export default function Sidebar() {
+type Props = {
+  activeSection: 'dashboard' | 'trending' | 'upload' | 'saved' | 'settings'
+  onSelect: (v: 'dashboard' | 'trending' | 'upload' | 'saved' | 'settings') => void
+}
+
+export default function Sidebar({ activeSection, onSelect }: Props) {
   return (
     <aside className="h-full sticky top-20 self-start">
-      <nav className="w-64 lg:w-72 xl:w-80 flex flex-col justify-between h-[calc(100vh-5rem)]">
+      <nav role="navigation" aria-label="Dashboard sidebar" className="w-full max-w-xs sm:max-w-sm lg:max-w-md flex flex-col justify-between h-[calc(100vh-5rem)] px-1">
         <div>
           <div className="flex items-center gap-3 mb-8">
             <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
@@ -21,36 +26,30 @@ export default function Sidebar() {
           </div>
 
           <ul className="space-y-2">
-            <li>
-              <button className="w-full flex items-center gap-3 text-foreground px-3 py-2 rounded-md hover:bg-accent/10 transition-colors">
-                <Home className="size-4" />
-                <span>Dashboard</span>
-              </button>
-            </li>
-            <li>
-              <button className="w-full flex items-center gap-3 text-foreground px-3 py-2 rounded-md hover:bg-accent/10 transition-colors">
-                <TrendingUp className="size-4" />
-                <span>Trending Topics</span>
-              </button>
-            </li>
-            <li>
-              <button className="w-full flex items-center gap-3 text-foreground px-3 py-2 rounded-md hover:bg-accent/10 transition-colors">
-                <Upload className="size-4" />
-                <span>Upload Documents</span>
-              </button>
-            </li>
-            <li>
-              <button className="w-full flex items-center gap-3 text-foreground px-3 py-2 rounded-md hover:bg-accent/10 transition-colors">
-                <Bookmark className="size-4" />
-                <span>Saved Insights</span>
-              </button>
-            </li>
-            <li>
-              <button className="w-full flex items-center gap-3 text-foreground px-3 py-2 rounded-md hover:bg-accent/10 transition-colors">
-                <Settings className="size-4" />
-                <span>Settings</span>
-              </button>
-            </li>
+            {[
+              { key: 'dashboard', label: 'Dashboard', Icon: Home },
+              { key: 'trending', label: 'Trending Topics', Icon: TrendingUp },
+              { key: 'upload', label: 'Upload Documents', Icon: Upload },
+              { key: 'saved', label: 'Saved Insights', Icon: Bookmark },
+              { key: 'settings', label: 'Settings', Icon: Settings },
+            ].map((item) => {
+              const isActive = activeSection === (item.key as Props['activeSection'])
+              return (
+                <li key={item.key}>
+                  <button
+                    onClick={() => onSelect(item.key as Props['activeSection'])}
+                    aria-current={isActive || undefined}
+                    className={
+                      `w-full flex items-center gap-3 text-foreground px-3 py-2 rounded-md transition-colors focus-visible:ring-2 focus-visible:ring-accent/40 ` +
+                      (isActive ? 'bg-accent/10 font-semibold' : 'hover:bg-accent/10')
+                    }
+                  >
+                    <item.Icon className="size-4" />
+                    <span>{item.label}</span>
+                  </button>
+                </li>
+              )
+            })}
           </ul>
         </div>
 
