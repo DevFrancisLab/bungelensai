@@ -47,7 +47,7 @@ export default function Dashboard() {
 
           {/* Right insights panel */}
           <div className="lg:col-span-3">
-            <RightPanel />
+            <RightPanel activeSection={activeSection} />
           </div>
         </div>
       </section>
