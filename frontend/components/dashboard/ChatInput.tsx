@@ -26,9 +26,9 @@ export default function ChatInput({ onSend, suggestion }: { onSend: (text: strin
   }
 
   return (
-    <form onSubmit={submit} className="sticky bottom-0 bg-background/50 backdrop-blur-sm py-3 px-4 rounded-md">
+    <form onSubmit={submit} className="sticky bottom-0 bg-background/70 backdrop-blur-sm py-3 px-4 rounded-md z-10">
       <div className="flex gap-3">
-        <Input ref={inputRef} aria-label="Type your message" placeholder="Ask BungeLens about a bill, debate or member..." value={value} onChange={(e) => setValue(e.target.value)} />
+        <Input ref={inputRef} aria-label="Type your message" placeholder="Ask BungeLens about a bill, debate or member..." value={value} onChange={(e) => setValue(e.target.value)} className="flex-1" />
         <Button type="submit" className="whitespace-nowrap">Send</Button>
       </div>
     </form>

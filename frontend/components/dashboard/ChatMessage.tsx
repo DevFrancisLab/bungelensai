@@ -27,7 +27,7 @@ export default function ChatMessage({
   const isAssistant = role === 'assistant'
 
   return (
-    <div className={cn('flex gap-3 items-start', isAssistant ? 'flex-row' : 'flex-row-reverse')}>
+    <div className={cn('flex gap-4 items-start py-2', isAssistant ? 'flex-row' : 'flex-row-reverse')}>
       <div className="shrink-0">
         <Avatar>
           <AvatarFallback>{isAssistant ? 'BL' : 'YOU'}</AvatarFallback>
@@ -35,25 +35,25 @@ export default function ChatMessage({
       </div>
 
       <div className="flex-1">
-        <Card className={isAssistant ? 'bg-card' : 'bg-primary/5'}>
-          <div className={cn('px-4 py-3')}>
+        <Card className={cn(isAssistant ? 'bg-card' : 'bg-primary/5')}>
+          <div className={cn('px-5 py-4')}> 
             {/* User text bubble */}
-            {text && <p className={cn('text-sm', isAssistant ? 'text-muted-foreground' : 'text-foreground')}>{text}</p>}
+            {text && <p className={cn('text-sm md:text-base', isAssistant ? 'text-muted-foreground' : 'text-foreground')}>{text}</p>}
 
             {/* Typing indicator */}
             {typing && (
-              <div className="mt-2 flex items-center gap-3">
-                <div className="size-4 animate-pulse rounded-full bg-muted-foreground/30" />
+              <div className="mt-3 flex items-center gap-3">
+                <div className="h-3 w-3 animate-pulse rounded-full bg-muted-foreground/30" />
                 <div className="text-sm text-muted-foreground">BungeLens is typing…</div>
               </div>
             )}
 
             {/* Structured AI response */}
             {aiResponse && (
-              <div className="mt-3 space-y-3">
+              <div className="mt-4 space-y-4">
                 <div>
                   <div className="font-semibold">Summary</div>
-                  <p className="text-sm text-muted-foreground mt-1">{aiResponse.summary}</p>
+                  <p className="text-sm md:text-base text-muted-foreground mt-1">{aiResponse.summary}</p>
                 </div>
 
                 <div>

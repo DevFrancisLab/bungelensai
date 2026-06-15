@@ -3,8 +3,7 @@
 import React from 'react'
 import ChatMessage from './ChatMessage'
 import ChatInput from './ChatInput'
-import UploadCard from './UploadCard'
-import DocumentCard from './DocumentCard'
+import UploadPanel from './UploadPanel'
 import { Card } from '@/components/ui/card'
 
 type Message =
@@ -60,11 +59,11 @@ export default function DashboardView({
 
       {/* AI conversation area */}
       <section className="space-y-4">
-        <Card className="transition-shadow duration-150">
-          <div className="flex flex-col" style={{ minHeight: 420 }}>
-            <div ref={containerRef} className="overflow-auto px-4 py-4 space-y-4" style={{ maxHeight: '56vh' }}>
+        <Card className="transition-shadow duration-150 shadow-lg ring-1 ring-accent/10">
+          <div className="flex flex-col min-h-[62vh]">
+            <div ref={containerRef} className="flex-1 overflow-auto px-6 py-6 space-y-6">
               {messages.length === 0 ? (
-                <div className="p-6 text-center text-muted-foreground">Start the conversation by asking about bills, debates, or members.</div>
+                <div className="p-8 text-center text-muted-foreground">Start the conversation by asking about bills, debates, or members.</div>
               ) : (
                 messages.map((m) =>
                   m.role === 'user' ? (
@@ -81,7 +80,7 @@ export default function DashboardView({
               )}
             </div>
 
-            <div className="border-t px-4 py-3 bg-background/60">
+            <div className="border-t px-6 py-4 bg-background/60">
               <ChatInput onSend={handleSend} suggestion={suggestion} />
             </div>
           </div>
