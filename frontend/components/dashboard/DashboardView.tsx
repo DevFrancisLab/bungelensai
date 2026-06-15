@@ -56,25 +56,8 @@ export default function DashboardView({
         </div>
       </section>
 
+      {/* AI conversation area */}
       <section className="space-y-4">
-        <UploadCard onFiles={handleFiles} />
-
-        {/* Documents list or empty state */}
-        <div className="grid grid-cols-1 gap-3">
-          {documents.length === 0 ? (
-            <div className="rounded-md border border-border bg-card p-6 text-center">
-              <div className="text-lg font-medium">No documents uploaded yet</div>
-              <div className="text-sm text-muted-foreground mt-2">Upload PDFs or drag-and-drop files to try the AI document analysis demo.</div>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {documents.map((doc) => (
-                <DocumentCard key={doc.id} doc={doc} />
-              ))}
-            </div>
-          )}
-        </div>
-
         <Card className="transition-shadow duration-150">
           <div className="flex flex-col" style={{ minHeight: 420 }}>
             <div ref={containerRef} className="overflow-auto px-4 py-4 space-y-4" style={{ maxHeight: '56vh' }}>
@@ -101,6 +84,25 @@ export default function DashboardView({
             </div>
           </div>
         </Card>
+
+        {/* Upload section (preserved) */}
+        <UploadCard onFiles={handleFiles} />
+
+        {/* Documents list or empty state */}
+        <div className="grid grid-cols-1 gap-3">
+          {documents.length === 0 ? (
+            <div className="rounded-md border border-border bg-card p-6 text-center">
+              <div className="text-lg font-medium">No documents uploaded yet</div>
+              <div className="text-sm text-muted-foreground mt-2">Upload PDFs or drag-and-drop files to try the AI document analysis demo.</div>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {documents.map((doc) => (
+                <DocumentCard key={doc.id} doc={doc} />
+              ))}
+            </div>
+          )}
+        </div>
       </section>
     </div>
   )
