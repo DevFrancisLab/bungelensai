@@ -3,7 +3,6 @@
 import React from 'react'
 import ChatMessage from './ChatMessage'
 import ChatInput from './ChatInput'
-import UploadPanel from './UploadPanel'
 import { Card } from '@/components/ui/card'
 
 type Message =
@@ -96,8 +95,8 @@ export default function DashboardView({
           </div>
         </Card>
 
-        {/* Unified upload panel (UploadCard + documents list) */}
-        <UploadPanel documents={documents} handleFiles={handleFiles} />
+        {/* Uploads removed from dashboard to focus on assistant.
+            Upload functionality remains available via the "Upload Documents" sidebar item. */}
       </section>
     </div>
   )
