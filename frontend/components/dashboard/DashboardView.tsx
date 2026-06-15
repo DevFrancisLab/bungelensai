@@ -61,6 +61,16 @@ export default function DashboardView({
       <section className="space-y-4">
         <Card className="transition-shadow duration-150 shadow-lg ring-1 ring-accent/10">
           <div className="flex flex-col min-h-[62vh]">
+            <div className="px-6 py-4 border-b bg-background/5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-sm text-muted-foreground">BungeLens Assistant</div>
+                  <div className="text-lg font-semibold">Ask anything about bills, debates or members</div>
+                </div>
+                <div className="text-sm text-muted-foreground">AI • Mock demo</div>
+              </div>
+            </div>
+
             <div ref={containerRef} className="flex-1 overflow-auto px-6 py-6 space-y-6">
               {messages.length === 0 ? (
                 <div className="p-8 text-center text-muted-foreground">Start the conversation by asking about bills, debates, or members.</div>

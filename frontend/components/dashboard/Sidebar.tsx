@@ -16,11 +16,11 @@ export default function Sidebar({ activeSection, onSelect }: Props) {
       <nav
         role="navigation"
         aria-label="Dashboard sidebar"
-        className="w-full max-w-xs sm:max-w-sm lg:max-w-md flex flex-col justify-between px-1 lg:h-[calc(100vh-5rem)] lg:overflow-auto"
+        className="w-full max-w-xs sm:max-w-sm lg:max-w-[280px] flex flex-col justify-between px-3 lg:h-[calc(100vh-5rem)] lg:overflow-auto"
       >
         <div>
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
+          <div className="flex items-center gap-4 mb-8">
+            <div className="w-12 h-12 rounded-lg bg-primary flex items-center justify-center shadow-sm">
               <span className="text-primary-foreground font-bold">B</span>
             </div>
             <div>
@@ -44,12 +44,12 @@ export default function Sidebar({ activeSection, onSelect }: Props) {
                     onClick={() => onSelect(item.key as Props['activeSection'])}
                     aria-current={isActive || undefined}
                     className={
-                      `w-full flex items-center gap-3 text-foreground px-3 py-2 rounded-md transition-colors focus-visible:ring-2 focus-visible:ring-accent/40 ` +
-                      (isActive ? 'bg-accent/10 font-semibold' : 'hover:bg-accent/10')
+                      `w-full flex items-center gap-3 text-foreground px-3 py-2 rounded-md transition-shadow duration-150 ease-in-out focus-visible:ring-2 focus-visible:ring-accent/40 ` +
+                      (isActive ? 'bg-accent/10 font-semibold shadow-sm' : 'hover:bg-accent/10 hover:shadow-sm')
                     }
                   >
                     <item.Icon className="size-4" />
-                    <span>{item.label}</span>
+                    <span className="text-sm md:text-base">{item.label}</span>
                   </button>
                 </li>
               )

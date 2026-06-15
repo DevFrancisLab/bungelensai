@@ -15,12 +15,12 @@ export default function DocumentCard({
   const processing = doc.status !== 'Complete'
 
   return (
-    <Card className="p-3 hover:shadow-md transition-shadow duration-150">
-      <CardHeader className="px-2 py-2">
+    <Card className="p-4 hover:shadow-md transition-shadow duration-200">
+      <CardHeader className="px-4 py-3">
         <div className="flex items-start justify-between gap-3">
           <div>
             <div className="font-medium truncate">{doc.name}</div>
-            <div className="text-xs text-muted-foreground mt-1 flex items-center gap-2"><Calendar className="size-3" />{doc.date}</div>
+            <div className="text-xs text-muted-foreground mt-2 flex items-center gap-2"><Calendar className="size-3" />{doc.date}</div>
           </div>
 
           <div className="text-right">
@@ -37,7 +37,7 @@ export default function DocumentCard({
           </div>
         </div>
       </CardHeader>
-      <CardContent className="px-2 py-2 text-sm text-muted-foreground">
+      <CardContent className="px-4 py-3 text-sm text-muted-foreground">
         <div>Summary: {doc.status === 'Complete' ? 'AI analysis generated' : 'Processing...'}</div>
       </CardContent>
     </Card>

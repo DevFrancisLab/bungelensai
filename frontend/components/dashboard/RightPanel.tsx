@@ -7,7 +7,7 @@ import { Home, FileText, BarChart2, BookOpen, Heart, Leaf } from 'lucide-react'
 
 export default function RightPanel() {
   return (
-    <aside className="w-full">
+    <aside className="w-full lg:sticky lg:top-20 lg:self-start">
       <div className="space-y-4">
         {/* Trending in Parliament */}
         <Card className="hover:shadow-lg transition-shadow duration-200">
