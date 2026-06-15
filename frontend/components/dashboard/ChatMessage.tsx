@@ -30,7 +30,7 @@ export default function ChatMessage({
     <div className={cn('flex gap-4 items-start py-2', isAssistant ? 'flex-row' : 'flex-row-reverse')}>
       <div className="shrink-0">
         <Avatar>
-          <AvatarFallback>{isAssistant ? 'BL' : 'YOU'}</AvatarFallback>
+          <AvatarFallback />
         </Avatar>
       </div>
 

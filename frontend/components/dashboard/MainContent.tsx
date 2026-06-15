@@ -17,29 +17,7 @@ type Message =
   | { id: string; role: 'user'; text: string }
   | { id: string; role: 'assistant'; typing?: boolean; aiResponse?: { summary: string; keyInsights: string[]; citizenImpact: string; tags: string[] } }
 
-const initialMessages: Message[] = [
-  {
-    id: 'm1',
-    role: 'user',
-    text: 'Can you summarise the Education Bill passed last week and how it affects school funding?'
-  },
-  {
-    id: 'm2',
-    role: 'assistant',
-    aiResponse: {
-      summary:
-        'The Education Bill increases baseline school funding by 6% and introduces a targeted grant for rural schools to address resource gaps.',
-      keyInsights: [
-        'Baseline funding rise of 6% across public schools.',
-        'Targeted rural grant for infrastructure and teacher training.',
-        'Accountability measures require quarterly reporting from districts.'
-      ],
-      citizenImpact:
-        'Families in rural constituencies should see improved classroom resources and teacher support within the next academic year; urban schools will receive incremental funding increases.',
-      tags: ['Education', 'Budget', 'Rural']
-    }
-  }
-]
+const initialMessages: Message[] = []
 
 type SectionKey = 'dashboard' | 'trending' | 'upload' | 'saved' | 'settings'
 
@@ -47,6 +25,7 @@ export default function MainContent({ activeSection = 'dashboard' }: { activeSec
   const [messages, setMessages] = useState<Message[]>(initialMessages)
   const containerRef = useRef<HTMLDivElement | null>(null)
   const [suggestion, setSuggestion] = useState<string | undefined>(undefined)
+  const [started, setStarted] = useState<boolean>(false)
   const [documents, setDocuments] = useState<Array<{ id: string; name: string; date: string; status: string; topics: string[] }>>([])
   const [viewVisible, setViewVisible] = useState(true)
 
@@ -78,6 +57,8 @@ export default function MainContent({ activeSection = 'dashboard' }: { activeSec
   }, [messages])
 
   function handleSend(text: string) {
+    // mark conversation as started when user sends their first message
+    setStarted(true)
     const userMessage: Message = { id: String(Date.now()), role: 'user', text }
     setMessages((m) => [...m, userMessage])
     // append a typing indicator message
@@ -174,19 +155,23 @@ export default function MainContent({ activeSection = 'dashboard' }: { activeSec
   }
 
   return (
-    <div className="relative h-full">
+    <div className="relative h-full overflow-hidden min-h-0">
       {/* Dashboard (assistant) */}
       <div className={
         `absolute inset-0 h-full transition-all duration-250 ease-in-out transform ${activeSection === 'dashboard' ? 'opacity-100 translate-y-0 z-10' : 'opacity-0 -translate-y-2 pointer-events-none z-0'}`
       } aria-hidden={activeSection !== 'dashboard'}>
-        <DashboardView
+          <DashboardView
           messages={messages}
           containerRef={containerRef}
           suggestion={suggestion}
-          setSuggestion={(s) => setSuggestion(s)}
+          setSuggestion={(s) => {
+            setSuggestion(s)
+            if (s) setStarted(true)
+          }}
           handleSend={handleSend}
           documents={documents}
           handleFiles={handleFiles}
+          hasStarted={started}
         />
       </div>
 

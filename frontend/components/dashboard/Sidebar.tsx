@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Home, TrendingUp, Upload, Bookmark, Settings, ChevronLeft, ChevronRight } from 'lucide-react'
@@ -13,34 +13,48 @@ type Props = {
 }
 
 export default function Sidebar({ activeSection, onSelect, collapsed = false, setCollapsed }: Props) {
+  // Support both controlled (parent provides setCollapsed) and uncontrolled usage.
+  const [internalCollapsed, setInternalCollapsed] = useState<boolean>(collapsed)
+  const controlled = typeof setCollapsed === 'function'
+  useEffect(() => {
+    if (!controlled) return
+    // keep internal in sync when parent controls collapsed
+    setInternalCollapsed(collapsed)
+  }, [collapsed, controlled])
+
+  const isCollapsed = controlled ? collapsed : internalCollapsed
+
+  function toggle() {
+    if (controlled) setCollapsed && setCollapsed((s) => !s)
+    else setInternalCollapsed((s) => !s)
+  }
 
   return (
-    <aside className={`lg:sticky lg:top-20 lg:self-start transition-all duration-200`}> 
+    <aside className={`lg:sticky lg:top-6 lg:self-start transition-all duration-200`}> 
       <nav
         role="navigation"
         aria-label="Dashboard sidebar"
-        className={`w-full max-w-xs sm:max-w-sm flex flex-col justify-between px-3 lg:h-[calc(100vh-5rem)] lg:overflow-auto transition-all duration-200 ${collapsed ? 'lg:max-w-[72px]' : 'lg:max-w-[280px]'}`}
+        className={`relative w-full max-w-xs sm:max-w-sm flex flex-col justify-between px-3 lg:h-[calc(100vh-5rem)] lg:overflow-auto transition-all duration-200 ${isCollapsed ? 'lg:max-w-[72px]' : 'lg:max-w-[280px]'}`}
       >
         <div>
-          <div className="flex items-center justify-between gap-4 mb-6">
-            <div className="flex items-center gap-3">
-              <div className={`w-12 h-12 rounded-lg bg-primary flex items-center justify-center shadow-sm ${collapsed ? 'w-10 h-10' : 'w-12 h-12'}`}>
-                <span className="text-primary-foreground font-bold">B</span>
-              </div>
-              {!collapsed && (
-                <div>
-                  <div className="font-semibold">BungeLens AI</div>
-                  <div className="text-sm text-muted-foreground">Dashboard</div>
-                </div>
-              )}
+          <div className="flex items-center gap-3 mb-6">
+            <div className={`w-12 h-12 rounded-lg bg-primary flex items-center justify-center shadow-sm ${isCollapsed ? 'w-10 h-10' : 'w-12 h-12'}`}>
+              <span className="text-primary-foreground font-bold">B</span>
             </div>
+            {!isCollapsed && (
+              <div>
+                <div className="font-semibold">BungeLens AI</div>
+                <div className="text-sm text-muted-foreground">Dashboard</div>
+              </div>
+            )}
 
+            {/* Toggle positioned absolutely so it's always visible */}
             <button
-              aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-              onClick={() => setCollapsed && setCollapsed((s) => !s)}
-              className="ml-2 rounded-full p-1 hover:bg-accent/5 transition-colors"
+              aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              onClick={toggle}
+              className="absolute right-3 top-3 rounded-full p-1 hover:bg-accent/5 transition-colors z-20"
             >
-              {collapsed ? <ChevronRight className="size-4" /> : <ChevronLeft className="size-4" />}
+              {isCollapsed ? <ChevronRight className="size-4" /> : <ChevronLeft className="size-4" />}
             </button>
           </div>
 
@@ -64,7 +78,7 @@ export default function Sidebar({ activeSection, onSelect, collapsed = false, se
                     }
                   >
                     <item.Icon className="size-4" />
-                    <span className={`${collapsed ? 'hidden' : 'text-sm md:text-base'}`}>{item.label}</span>
+                    <span className={`${isCollapsed ? 'hidden' : 'text-sm md:text-base'}`}>{item.label}</span>
                   </button>
                 </li>
               )
@@ -72,7 +86,7 @@ export default function Sidebar({ activeSection, onSelect, collapsed = false, se
           </ul>
         </div>
 
-        {!collapsed && (
+        {!isCollapsed && (
           <div className="mt-6">
             <div className="text-sm font-medium mb-3">My Interests</div>
             <div className="flex flex-wrap gap-2">

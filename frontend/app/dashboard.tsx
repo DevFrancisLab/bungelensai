@@ -10,46 +10,56 @@ export type SectionKey = 'dashboard' | 'trending' | 'upload' | 'saved' | 'settin
 export default function Dashboard() {
   const [activeSection, setActiveSection] = useState<SectionKey>('dashboard')
   const [collapsed, setCollapsed] = useState<boolean>(false)
+  const [rightVisible, setRightVisible] = useState<boolean>(true)
 
   return (
-    <main className="min-h-screen bg-background text-foreground">
-      {/* Top nav */}
-      <header className="w-full border-b border-border bg-background/80 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-bold">B</span>
-            </div>
-            <div>
-              <div className="font-semibold">BungeLens AI</div>
-              <div className="text-sm text-muted-foreground">Civic intelligence for everyone</div>
-            </div>
-          </div>
+    <main className="h-screen bg-background text-foreground overflow-hidden">
+      <section className="max-w-7xl mx-auto px-6 py-6 h-full">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 h-full transition-all duration-200 ease-in-out">
+          {/* compute responsive column spans */}
+          {/**
+           * sidebarSpan: 2 when collapsed, otherwise 3
+           * rightSpan: 0 when hidden, otherwise 2 when collapsed or 3 when expanded
+           * mainSpan: remaining columns
+           */}
+          {(() => {
+            const sidebarSpan = collapsed ? 2 : 3
+            const rightSpan = rightVisible ? (collapsed ? 2 : 3) : 0
+            const mainSpan = 12 - sidebarSpan - rightSpan
 
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-3">
-              {/* Placeholder for utilities (notifications, avatar) */}
-            </div>
-          </div>
-        </div>
-      </header>
+            // map spans to literal class names so Tailwind sees them
+            const sidebarClass = collapsed ? 'lg:col-span-2' : 'lg:col-span-3'
+            const rightClass = rightVisible ? (collapsed ? 'lg:col-span-2' : 'lg:col-span-3') : ''
+            // main span depends on both collapsed and rightVisible
+            const mainClass = collapsed
+              ? rightVisible
+                ? 'lg:col-span-8' // sidebar 2 + right 2
+                : 'lg:col-span-10' // sidebar 2 + right 0
+              : rightVisible
+              ? 'lg:col-span-6' // sidebar 3 + right 3
+              : 'lg:col-span-9' // sidebar 3 + right 0
 
-      <section className="max-w-7xl mx-auto px-6 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 min-h-[calc(100vh-5rem)] transition-all duration-200 ease-in-out">
-          {/* Left sidebar */}
-          <div className={`lg:col-span-3 ${collapsed ? 'lg:col-span-2' : ''}`}>
-            <Sidebar activeSection={activeSection} onSelect={setActiveSection} collapsed={collapsed} setCollapsed={setCollapsed} />
-          </div>
+            return (
+              <>
+                {/* Left sidebar */}
+                <div className={sidebarClass}>
+                  <Sidebar activeSection={activeSection} onSelect={setActiveSection} collapsed={collapsed} setCollapsed={setCollapsed} />
+                </div>
 
-          {/* Main content area */}
-          <div className={`lg:col-span-6 ${collapsed ? 'lg:col-span-8' : ''}`}>
-            <MainContent activeSection={activeSection} />
-          </div>
+                {/* Main content area */}
+                <div className={`${mainClass} min-h-0`}>
+                  <MainContent activeSection={activeSection} />
+                </div>
 
-          {/* Right insights panel */}
-          <div className={`lg:col-span-3 ${collapsed ? 'lg:col-span-2' : ''}`}>
-            <RightPanel activeSection={activeSection} />
-          </div>
+                {/* Right insights panel (render only when visible) */}
+                {rightVisible && (
+                  <div className={rightClass}>
+                    <RightPanel activeSection={activeSection} onClose={() => setRightVisible(false)} />
+                  </div>
+                )}
+              </>
+            )
+          })()}
         </div>
       </section>
     </main>

@@ -7,13 +7,14 @@ import { Home, FileText, BarChart2, BookOpen, Heart, Leaf } from 'lucide-react'
 
 type Props = {
   activeSection?: 'dashboard' | 'trending' | 'upload' | 'saved' | 'settings'
+  onClose?: () => void
 }
 
-export default function RightPanel({ activeSection = 'dashboard' }: Props) {
+export default function RightPanel({ activeSection = 'dashboard', onClose }: Props) {
   const showTrending = activeSection !== 'dashboard'
 
   return (
-    <aside className="w-full lg:sticky lg:top-20 lg:self-start">
+    <aside className="w-full lg:sticky lg:top-6 lg:self-start">
       <div className="space-y-4">
         {/* Trending in Parliament (hidden on Dashboard home to keep assistant primary) */}
         {showTrending && (
@@ -51,12 +52,15 @@ export default function RightPanel({ activeSection = 'dashboard' }: Props) {
           </Card>
         )}
 
-        {/* Parliamentary Activity */}
+        {/* Parliamentary Activity (closable) */}
         <Card className="hover:shadow-lg transition-shadow duration-200">
-          <CardHeader className="px-4 py-3">
+          <CardHeader className="px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <BarChart2 />
               <CardTitle>Parliamentary Activity</CardTitle>
+            </div>
+            <div>
+              <button aria-label="Close panel" onClick={() => onClose && onClose()} className="text-sm text-muted-foreground hover:text-foreground transition-colors">Close</button>
             </div>
           </CardHeader>
           <CardContent>
