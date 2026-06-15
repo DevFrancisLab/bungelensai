@@ -12,8 +12,12 @@ type Props = {
 
 export default function Sidebar({ activeSection, onSelect }: Props) {
   return (
-    <aside className="h-full sticky top-20 self-start">
-      <nav role="navigation" aria-label="Dashboard sidebar" className="w-full max-w-xs sm:max-w-sm lg:max-w-md flex flex-col justify-between h-[calc(100vh-5rem)] px-1">
+    <aside className="lg:sticky lg:top-20 lg:self-start">
+      <nav
+        role="navigation"
+        aria-label="Dashboard sidebar"
+        className="w-full max-w-xs sm:max-w-sm lg:max-w-md flex flex-col justify-between px-1 lg:h-[calc(100vh-5rem)] lg:overflow-auto"
+      >
         <div>
           <div className="flex items-center gap-3 mb-8">
             <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
