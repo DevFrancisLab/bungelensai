@@ -27,7 +27,7 @@ export default function DashboardView({
   handleFiles: (files: File[]) => void
 }) {
   return (
-    <div className="transition-transform duration-200 opacity-100 translate-y-0">
+    <div className="transition-transform duration-200 opacity-100 translate-y-0 flex flex-col h-full">
       <section>
         <h2 className="text-2xl md:text-3xl font-semibold">Good afternoon <span aria-hidden>👋</span></h2>
         <h3 className="text-2xl md:text-3xl font-semibold mt-2">Ask BungeLens AI</h3>
@@ -57,9 +57,9 @@ export default function DashboardView({
       </section>
 
       {/* AI conversation area */}
-      <section className="space-y-4">
-        <Card className="transition-shadow duration-150 shadow-lg ring-1 ring-accent/10">
-          <div className="flex flex-col min-h-[62vh]">
+      <section className="space-y-4 flex-1">
+        <Card className="transition-shadow duration-150 shadow-lg ring-1 ring-accent/10 h-full">
+          <div className="flex flex-col h-full">
             <div className="px-6 py-4 border-b bg-background/5">
               <div className="flex items-center justify-between">
                 <div>

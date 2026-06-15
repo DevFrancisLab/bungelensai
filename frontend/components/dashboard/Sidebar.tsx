@@ -1,9 +1,9 @@
 "use client"
 
-import React from 'react'
+import React, { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Home, TrendingUp, Upload, Bookmark, Settings } from 'lucide-react'
+import { Home, TrendingUp, Upload, Bookmark, Settings, ChevronLeft, ChevronRight } from 'lucide-react'
 
 type Props = {
   activeSection: 'dashboard' | 'trending' | 'upload' | 'saved' | 'settings'
@@ -11,22 +11,36 @@ type Props = {
 }
 
 export default function Sidebar({ activeSection, onSelect }: Props) {
+  const [collapsed, setCollapsed] = useState(false)
+
   return (
-    <aside className="lg:sticky lg:top-20 lg:self-start">
+    <aside className={`lg:sticky lg:top-20 lg:self-start transition-all duration-200`}> 
       <nav
         role="navigation"
         aria-label="Dashboard sidebar"
-        className="w-full max-w-xs sm:max-w-sm lg:max-w-[280px] flex flex-col justify-between px-3 lg:h-[calc(100vh-5rem)] lg:overflow-auto"
+        className={`w-full max-w-xs sm:max-w-sm flex flex-col justify-between px-3 lg:h-[calc(100vh-5rem)] lg:overflow-auto transition-all duration-200 ${collapsed ? 'lg:max-w-[72px]' : 'lg:max-w-[280px]'}`}
       >
         <div>
-          <div className="flex items-center gap-4 mb-8">
-            <div className="w-12 h-12 rounded-lg bg-primary flex items-center justify-center shadow-sm">
-              <span className="text-primary-foreground font-bold">B</span>
+          <div className="flex items-center justify-between gap-4 mb-6">
+            <div className="flex items-center gap-3">
+              <div className={`w-12 h-12 rounded-lg bg-primary flex items-center justify-center shadow-sm ${collapsed ? 'w-10 h-10' : 'w-12 h-12'}`}>
+                <span className="text-primary-foreground font-bold">B</span>
+              </div>
+              {!collapsed && (
+                <div>
+                  <div className="font-semibold">BungeLens AI</div>
+                  <div className="text-sm text-muted-foreground">Dashboard</div>
+                </div>
+              )}
             </div>
-            <div>
-              <div className="font-semibold">BungeLens AI</div>
-              <div className="text-sm text-muted-foreground">Dashboard</div>
-            </div>
+
+            <button
+              aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              onClick={() => setCollapsed((s) => !s)}
+              className="ml-2 rounded-full p-1 hover:bg-accent/5 transition-colors"
+            >
+              {collapsed ? <ChevronRight className="size-4" /> : <ChevronLeft className="size-4" />}
+            </button>
           </div>
 
           <ul className="space-y-2">
@@ -49,7 +63,7 @@ export default function Sidebar({ activeSection, onSelect }: Props) {
                     }
                   >
                     <item.Icon className="size-4" />
-                    <span className="text-sm md:text-base">{item.label}</span>
+                    <span className={`${collapsed ? 'hidden' : 'text-sm md:text-base'}`}>{item.label}</span>
                   </button>
                 </li>
               )
@@ -57,15 +71,17 @@ export default function Sidebar({ activeSection, onSelect }: Props) {
           </ul>
         </div>
 
-        <div className="mt-6">
-          <div className="text-sm font-medium mb-3">My Interests</div>
-          <div className="flex flex-wrap gap-2">
-            <Badge variant="outline">Healthcare</Badge>
-            <Badge variant="outline">Education</Badge>
-            <Badge variant="outline">Youth</Badge>
-            <Badge variant="outline">Employment</Badge>
+        {!collapsed && (
+          <div className="mt-6">
+            <div className="text-sm font-medium mb-3">My Interests</div>
+            <div className="flex flex-wrap gap-2">
+              <Badge variant="outline">Healthcare</Badge>
+              <Badge variant="outline">Education</Badge>
+              <Badge variant="outline">Youth</Badge>
+              <Badge variant="outline">Employment</Badge>
+            </div>
           </div>
-        </div>
+        )}
       </nav>
     </aside>
   )

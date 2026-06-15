@@ -174,10 +174,10 @@ export default function MainContent({ activeSection = 'dashboard' }: { activeSec
   }
 
   return (
-    <div className="relative min-h-[64vh]">
+    <div className="relative h-full">
       {/* Dashboard (assistant) */}
       <div className={
-        `absolute inset-0 transition-all duration-250 ease-in-out transform ${activeSection === 'dashboard' ? 'opacity-100 translate-y-0 z-10' : 'opacity-0 -translate-y-2 pointer-events-none z-0'}`
+        `absolute inset-0 h-full transition-all duration-250 ease-in-out transform ${activeSection === 'dashboard' ? 'opacity-100 translate-y-0 z-10' : 'opacity-0 -translate-y-2 pointer-events-none z-0'}`
       } aria-hidden={activeSection !== 'dashboard'}>
         <DashboardView
           messages={messages}
@@ -192,28 +192,28 @@ export default function MainContent({ activeSection = 'dashboard' }: { activeSec
 
       {/* Trending */}
       <div className={
-        `absolute inset-0 transition-all duration-250 ease-in-out transform ${activeSection === 'trending' ? 'opacity-100 translate-y-0 z-10' : 'opacity-0 -translate-y-2 pointer-events-none z-0'}`
+        `absolute inset-0 h-full transition-all duration-250 ease-in-out transform ${activeSection === 'trending' ? 'opacity-100 translate-y-0 z-10' : 'opacity-0 -translate-y-2 pointer-events-none z-0'}`
       } aria-hidden={activeSection !== 'trending'}>
         <TrendingTopicsView />
       </div>
 
       {/* Upload */}
       <div className={
-        `absolute inset-0 transition-all duration-250 ease-in-out transform ${activeSection === 'upload' ? 'opacity-100 translate-y-0 z-10' : 'opacity-0 -translate-y-2 pointer-events-none z-0'}`
+        `absolute inset-0 h-full transition-all duration-250 ease-in-out transform ${activeSection === 'upload' ? 'opacity-100 translate-y-0 z-10' : 'opacity-0 -translate-y-2 pointer-events-none z-0'}`
       } aria-hidden={activeSection !== 'upload'}>
         <UploadDocumentsView documents={documents} handleFiles={handleFiles} />
       </div>
 
       {/* Saved */}
       <div className={
-        `absolute inset-0 transition-all duration-250 ease-in-out transform ${activeSection === 'saved' ? 'opacity-100 translate-y-0 z-10' : 'opacity-0 -translate-y-2 pointer-events-none z-0'}`
+        `absolute inset-0 h-full transition-all duration-250 ease-in-out transform ${activeSection === 'saved' ? 'opacity-100 translate-y-0 z-10' : 'opacity-0 -translate-y-2 pointer-events-none z-0'}`
       } aria-hidden={activeSection !== 'saved'}>
         <SavedInsightsView />
       </div>
 
       {/* Settings */}
       <div className={
-        `absolute inset-0 transition-all duration-250 ease-in-out transform ${activeSection === 'settings' ? 'opacity-100 translate-y-0 z-10' : 'opacity-0 -translate-y-2 pointer-events-none z-0'}`
+        `absolute inset-0 h-full transition-all duration-250 ease-in-out transform ${activeSection === 'settings' ? 'opacity-100 translate-y-0 z-10' : 'opacity-0 -translate-y-2 pointer-events-none z-0'}`
       } aria-hidden={activeSection !== 'settings'}>
         <SettingsView />
       </div>

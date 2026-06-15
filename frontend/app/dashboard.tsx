@@ -33,8 +33,8 @@ export default function Dashboard() {
         </div>
       </header>
 
-      <section className="max-w-7xl mx-auto px-6 py-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <section className="max-w-7xl mx-auto px-6 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 min-h-[calc(100vh-5rem)]">
           {/* Left sidebar */}
           <div className="lg:col-span-3">
             <Sidebar activeSection={activeSection} onSelect={setActiveSection} />
