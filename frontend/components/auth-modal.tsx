@@ -10,8 +10,8 @@ import { useGuestModal } from '@/context/guest-context'
 import { Spinner } from '@/components/ui/spinner'
 
 export default function AuthenticationModal() {
-  const { isOpen, close, authMode } = useAuthModal()
-  const { endGuestSession } = useGuestModal()
+  const { isOpen, close, authMode, setAuthenticated } = useAuthModal()
+  const { preservedConversation } = useGuestModal()
   const [loading, setLoading] = useState(false)
 
   function navigateToDashboard() {
@@ -32,8 +32,8 @@ export default function AuthenticationModal() {
     await new Promise((r) => setTimeout(r, 500))
 
     setLoading(false)
-    // if a guest session was active, end it now that the user signed in
-    try { endGuestSession() } catch (e) { /* no-op if unavailable */ }
+    // mark as authenticated (mock)
+    try { setAuthenticated(true) } catch (e) { }
     close()
     navigateToDashboard()
   }
@@ -43,7 +43,7 @@ export default function AuthenticationModal() {
     setLoading(true)
     await new Promise((r) => setTimeout(r, 500))
     setLoading(false)
-    try { endGuestSession() } catch (e) { }
+    try { setAuthenticated(true) } catch (e) { }
     close()
     navigateToDashboard()
   }

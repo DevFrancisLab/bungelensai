@@ -10,6 +10,8 @@ type AuthContextType = {
   close: () => void
   authMode: AuthMode
   setAuthMode: (mode: AuthMode) => void
+  isAuthenticated: boolean
+  setAuthenticated: (v: boolean) => void
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -17,13 +19,15 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export const AuthProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [authMode, setAuthModeState] = useState<AuthMode>('signin')
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
 
   const open = useCallback(() => setIsOpen(true), [])
   const close = useCallback(() => setIsOpen(false), [])
   const setAuthMode = useCallback((mode: AuthMode) => setAuthModeState(mode), [])
+  const setAuthenticated = useCallback((v: boolean) => setIsAuthenticated(v), [])
 
   return (
-    <AuthContext.Provider value={{ isOpen, open, close, authMode, setAuthMode }}>
+    <AuthContext.Provider value={{ isOpen, open, close, authMode, setAuthMode, isAuthenticated, setAuthenticated }}>
       {children}
     </AuthContext.Provider>
   )

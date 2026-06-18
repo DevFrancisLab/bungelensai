@@ -5,10 +5,17 @@ import Sidebar from '@/components/dashboard/Sidebar'
 import MainContent from '@/components/dashboard/MainContent'
 import RightPanel from '@/components/dashboard/RightPanel'
 import GuestBanner from '@/components/guest-banner'
+import { useGuestModal } from '@/context/guest-context'
+import { useAuthModal } from '@/context/auth-context'
+import { useToast } from '@/hooks/use-toast'
 
 export type SectionKey = 'dashboard' | 'trending' | 'upload' | 'history' | 'settings'
 
 export default function Dashboard() {
+  const { preservedConversation, setPreservedConversation, endGuestSession } = useGuestModal()
+  const { isAuthenticated, setAuthMode, open } = useAuthModal()
+  const { toast } = useToast()
+
   const [activeSection, setActiveSection] = useState<SectionKey>('dashboard')
   const [collapsed, setCollapsed] = useState<boolean>(false)
   const [rightVisible, setRightVisible] = useState<boolean>(true)
@@ -98,11 +105,51 @@ export default function Dashboard() {
     }
   }, [])
 
+  // When the user authenticates (mock), restore any preserved conversation saved before auth
+  useEffect(() => {
+    if (!isAuthenticated) return
+    if (!preservedConversation) return
+
+    const preserved = preservedConversation
+    const newId = preserved.id ?? 'c-' + Date.now()
+    const conv = {
+      id: newId,
+      title:
+        preserved.title || preserved.messages?.find((m: any) => m.role === 'user')?.text?.slice(0, 60) || 'Conversation',
+      lastUpdated: new Date().toISOString(),
+      messages: preserved.messages || [],
+      topics: [] as string[],
+    }
+
+    setConversations((c) => [conv, ...c])
+    setCurrentConversationId(newId)
+    setMessages(conv.messages)
+    // clear preserved conversation and end guest mode
+    setPreservedConversation(null)
+    try { endGuestSession() } catch (e) { }
+
+    try {
+      toast({ title: 'Your conversation is now associated with your account.' })
+    } catch (e) { }
+  }, [isAuthenticated, preservedConversation, setPreservedConversation, endGuestSession, toast])
+
   return (
     <main className="h-screen bg-background text-foreground overflow-hidden">
       <section className="max-w-7xl mx-auto px-6 py-6 h-full">
         {/* Guest banner (shown for temporary guest sessions) */}
-        <GuestBanner />
+        <GuestBanner onRequestAuth={(mode) => {
+          // preserve the current conversation/messages in guest context before opening auth
+          setPreservedConversation({ id: currentConversationId ?? undefined, title: conversations.find(c => c.id === currentConversationId)?.title || undefined, messages: messages })
+          try {
+            setAuthMode(mode)
+            open()
+          } catch (e) {
+            // no-op
+          }
+        }} />
+
+        {/* If user completes mock auth and there is a preserved conversation, restore it */}
+        {/* Restoration runs in an effect below */}
 
         <div className="flex flex-col lg:flex-row gap-8 h-full transition-all duration-200 ease-in-out">
           {/* compute responsive column spans */}
