@@ -3,9 +3,11 @@
 import React, { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { useAuthModal } from '@/context/auth-context'
+import { useGuestModal } from '@/context/guest-context'
 
 export default function Header() {
   const { open } = useAuthModal()
+  const { open: guestOpen } = useGuestModal()
   // Avoid importing `next/navigation` under Vite; determine pathname from window
   const [scrolled, setScrolled] = useState<boolean>(false)
 
@@ -38,7 +40,7 @@ export default function Header() {
           <Button variant="ghost" className="text-foreground hover:bg-muted" onClick={open} aria-haspopup="dialog">
             Sign In
           </Button>
-          <Button className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={open} aria-haspopup="dialog">
+          <Button className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => guestOpen()} aria-haspopup="dialog">
             Try BungeLens
           </Button>
         </div>

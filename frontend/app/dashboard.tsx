@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import Sidebar from '@/components/dashboard/Sidebar'
 import MainContent from '@/components/dashboard/MainContent'
 import RightPanel from '@/components/dashboard/RightPanel'
+import GuestBanner from '@/components/guest-banner'
 
 export type SectionKey = 'dashboard' | 'trending' | 'upload' | 'history' | 'settings'
 
@@ -100,6 +101,9 @@ export default function Dashboard() {
   return (
     <main className="h-screen bg-background text-foreground overflow-hidden">
       <section className="max-w-7xl mx-auto px-6 py-6 h-full">
+        {/* Guest banner (shown for temporary guest sessions) */}
+        <GuestBanner />
+
         <div className="flex flex-col lg:flex-row gap-8 h-full transition-all duration-200 ease-in-out">
           {/* compute responsive column spans */}
           {/**
@@ -127,7 +131,7 @@ export default function Dashboard() {
             return (
               <>
                 {/* Left sidebar */}
-                <div className={`shrink-0 transition-all duration-200 ease-in-out ${collapsed ? 'w-[72px]' : 'w-60'}`}>
+                <div className={`shrink-0 transition-all duration-200 ease-in-out ${collapsed ? 'w-18' : 'w-60'}`}>
                   <Sidebar activeSection={activeSection} onSelect={setActiveSection} collapsed={collapsed} setCollapsed={setCollapsed} onNewConversation={newConversation} />
                 </div>
 

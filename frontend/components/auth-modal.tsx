@@ -6,10 +6,12 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAuthModal } from '@/context/auth-context'
+import { useGuestModal } from '@/context/guest-context'
 import { Spinner } from '@/components/ui/spinner'
 
 export default function AuthenticationModal() {
-  const { isOpen, close } = useAuthModal()
+  const { isOpen, close, authMode } = useAuthModal()
+  const { endGuestSession } = useGuestModal()
   const [loading, setLoading] = useState(false)
 
   function navigateToDashboard() {
@@ -30,6 +32,8 @@ export default function AuthenticationModal() {
     await new Promise((r) => setTimeout(r, 500))
 
     setLoading(false)
+    // if a guest session was active, end it now that the user signed in
+    try { endGuestSession() } catch (e) { /* no-op if unavailable */ }
     close()
     navigateToDashboard()
   }
@@ -39,6 +43,7 @@ export default function AuthenticationModal() {
     setLoading(true)
     await new Promise((r) => setTimeout(r, 500))
     setLoading(false)
+    try { endGuestSession() } catch (e) { }
     close()
     navigateToDashboard()
   }
@@ -47,14 +52,14 @@ export default function AuthenticationModal() {
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) close() }}>
       <DialogContent aria-labelledby="auth-dialog-title" aria-describedby="auth-dialog-desc" className="max-w-md sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle id="auth-dialog-title" className="text-2xl md:text-3xl">Welcome to BungeLens</DialogTitle>
+          <DialogTitle id="auth-dialog-title" className="text-2xl md:text-3xl">{authMode === 'signup' ? 'Create an account' : 'Welcome to BungeLens'}</DialogTitle>
           <DialogDescription id="auth-dialog-desc">
-            Sign in or create an account to continue to your dashboard.
+            {authMode === 'signup' ? 'Create an account to save your chats and preferences.' : 'Sign in or create an account to continue to your dashboard.'}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6 mt-4 transition-opacity duration-200 ease-in-out" aria-busy={loading}>
-          <form onSubmit={handleSubmit} className="grid gap-4">
+          <form onSubmit={authMode === 'signup' ? (e) => { e.preventDefault(); handleCreateAccount() } : handleSubmit} className="grid gap-4">
             <div>
               <Label htmlFor="email">Email</Label>
               <Input id="email" name="email" type="email" placeholder="you@email.com" required aria-required="true" aria-label="Email" />
@@ -68,12 +73,14 @@ export default function AuthenticationModal() {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-1">
               <Button type="submit" className="flex items-center gap-2" disabled={loading} aria-disabled={loading} aria-live="polite">
                 {loading ? <Spinner className="size-4" /> : null}
-                <span>{loading ? 'Signing in…' : 'Sign In'}</span>
+                <span>{loading ? (authMode === 'signup' ? 'Creating…' : 'Signing in…') : (authMode === 'signup' ? 'Create Account' : 'Sign In')}</span>
               </Button>
 
-              <Button type="button" variant="ghost" onClick={handleCreateAccount} disabled={loading} aria-disabled={loading}>
-                {loading ? 'Processing…' : 'Create Account'}
-              </Button>
+              {authMode === 'signup' ? null : (
+                <Button type="button" variant="ghost" onClick={handleCreateAccount} disabled={loading} aria-disabled={loading}>
+                  {loading ? 'Processing…' : 'Create Account'}
+                </Button>
+              )}
             </div>
           </form>
 
