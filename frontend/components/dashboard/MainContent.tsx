@@ -157,7 +157,7 @@ export default function MainContent({ activeSection = 'dashboard' }: { activeSec
   return (
     <div className="relative h-full overflow-hidden min-h-0">
       {/* Dashboard (assistant) */}
-      <div className={
+        <div className={
         `absolute inset-0 h-full transition-all duration-250 ease-in-out transform ${activeSection === 'dashboard' ? 'opacity-100 translate-y-0 z-10' : 'opacity-0 -translate-y-2 pointer-events-none z-0'}`
       } aria-hidden={activeSection !== 'dashboard'}>
           <DashboardView
@@ -165,8 +165,13 @@ export default function MainContent({ activeSection = 'dashboard' }: { activeSec
           containerRef={containerRef}
           suggestion={suggestion}
           setSuggestion={(s) => {
+            // populate the input
             setSuggestion(s)
-            if (s) setStarted(true)
+            if (s) {
+              // mark started and immediately send the suggestion as a message
+              setStarted(true)
+              handleSend(s)
+            }
           }}
           handleSend={handleSend}
           documents={documents}

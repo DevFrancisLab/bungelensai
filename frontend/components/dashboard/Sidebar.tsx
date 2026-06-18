@@ -34,19 +34,17 @@ export default function Sidebar({ activeSection, onSelect, collapsed = false, se
       <nav
         role="navigation"
         aria-label="Dashboard sidebar"
-        className={`relative w-full max-w-xs sm:max-w-sm flex flex-col justify-between px-3 lg:h-[calc(100vh-5rem)] lg:overflow-auto transition-all duration-200 ${isCollapsed ? 'lg:max-w-[72px]' : 'lg:max-w-[280px]'}`}
+        className={`relative w-full flex flex-col justify-between px-3 lg:h-[calc(100vh-6rem)] lg:overflow-auto transition-all duration-200`}
       >
         <div>
           <div className="flex items-center gap-3 mb-6">
             <div className={`w-12 h-12 rounded-lg bg-primary flex items-center justify-center shadow-sm ${isCollapsed ? 'w-10 h-10' : 'w-12 h-12'}`}>
-              <span className="text-primary-foreground font-bold">B</span>
-            </div>
-            {!isCollapsed && (
-              <div>
+                <span className="text-primary-foreground font-bold">B</span>
+              </div>
+              <div className={`ml-3 transition-all duration-200 ${isCollapsed ? 'opacity-0 max-w-0 overflow-hidden' : 'opacity-100 max-w-full'}`}>
                 <div className="font-semibold">BungeLens AI</div>
                 <div className="text-sm text-muted-foreground">Dashboard</div>
               </div>
-            )}
 
             {/* Toggle positioned absolutely so it's always visible */}
             <button
@@ -70,15 +68,16 @@ export default function Sidebar({ activeSection, onSelect, collapsed = false, se
               return (
                 <li key={item.key}>
                   <button
+                    title={item.label}
                     onClick={() => onSelect(item.key as Props['activeSection'])}
                     aria-current={isActive || undefined}
                     className={
-                      `w-full flex items-center gap-3 text-foreground px-3 py-2 rounded-md transition-shadow duration-150 ease-in-out focus-visible:ring-2 focus-visible:ring-accent/40 ` +
+                      `w-full flex items-center ${isCollapsed ? 'justify-center' : 'justify-start'} gap-3 text-foreground px-3 py-2 rounded-md transition-all duration-200 ease-in-out focus-visible:ring-2 focus-visible:ring-accent/40 ` +
                       (isActive ? 'bg-accent/10 font-semibold shadow-sm' : 'hover:bg-accent/10 hover:shadow-sm')
                     }
                   >
                     <item.Icon className="size-4" />
-                    <span className={`${isCollapsed ? 'hidden' : 'text-sm md:text-base'}`}>{item.label}</span>
+                    <span className={`transition-all duration-200 ${isCollapsed ? 'opacity-0 max-w-0 overflow-hidden' : 'opacity-100 max-w-full ml-2 text-sm md:text-base'}`}>{item.label}</span>
                   </button>
                 </li>
               )

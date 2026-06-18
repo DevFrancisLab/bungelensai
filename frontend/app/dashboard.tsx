@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Sidebar from '@/components/dashboard/Sidebar'
 import MainContent from '@/components/dashboard/MainContent'
 import RightPanel from '@/components/dashboard/RightPanel'
@@ -12,10 +12,22 @@ export default function Dashboard() {
   const [collapsed, setCollapsed] = useState<boolean>(false)
   const [rightVisible, setRightVisible] = useState<boolean>(true)
 
+  // Prevent the browser window from scrolling while dashboard is mounted.
+  useEffect(() => {
+    const prevHtml = document.documentElement.style.overflow
+    const prevBody = document.body.style.overflow
+    document.documentElement.style.overflow = 'hidden'
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.documentElement.style.overflow = prevHtml
+      document.body.style.overflow = prevBody
+    }
+  }, [])
+
   return (
     <main className="h-screen bg-background text-foreground overflow-hidden">
       <section className="max-w-7xl mx-auto px-6 py-6 h-full">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 h-full transition-all duration-200 ease-in-out">
+        <div className="flex flex-col lg:flex-row gap-8 h-full transition-all duration-200 ease-in-out">
           {/* compute responsive column spans */}
           {/**
            * sidebarSpan: 2 when collapsed, otherwise 3
@@ -42,18 +54,18 @@ export default function Dashboard() {
             return (
               <>
                 {/* Left sidebar */}
-                <div className={sidebarClass}>
+                <div className={`shrink-0 transition-all duration-200 ease-in-out ${collapsed ? 'w-[72px]' : 'w-60'}`}>
                   <Sidebar activeSection={activeSection} onSelect={setActiveSection} collapsed={collapsed} setCollapsed={setCollapsed} />
                 </div>
 
-                {/* Main content area */}
-                <div className={`${mainClass} min-h-0`}>
+                {/* Main content area (primary) */}
+                <div className={`flex-1 min-h-0`}>
                   <MainContent activeSection={activeSection} />
                 </div>
 
-                {/* Right insights panel (render only when visible) */}
+                {/* Right insights panel (render only on large screens) */}
                 {rightVisible && (
-                  <div className={rightClass}>
+                  <div className="hidden lg:block shrink-0 w-72 transition-all duration-200 ease-in-out">
                     <RightPanel activeSection={activeSection} onClose={() => setRightVisible(false)} />
                   </div>
                 )}

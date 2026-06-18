@@ -14,7 +14,7 @@ export default function RightPanel({ activeSection = 'dashboard', onClose }: Pro
   const showTrending = activeSection !== 'dashboard'
 
   return (
-    <aside className="w-full lg:sticky lg:top-6 lg:self-start">
+    <aside className="h-full lg:sticky lg:top-6 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-auto">
       <div className="space-y-4">
         {/* Trending in Parliament (hidden on Dashboard home to keep assistant primary) */}
         {showTrending && (

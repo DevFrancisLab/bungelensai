@@ -64,7 +64,7 @@ export default function DashboardView({
 
       {/* AI conversation area */}
       <section className="space-y-4 flex-1">
-        <Card className="transition-shadow duration-150 shadow-lg ring-1 ring-accent/10 h-full">
+        <Card className="transition-shadow duration-150 shadow-lg ring-1 ring-accent/10 min-h-[70vh] max-h-[calc(100vh-6rem)]">
           <div className="flex flex-col h-full min-h-0">
             {/* Header removed to avoid placeholder title/content in chat area */}
 
