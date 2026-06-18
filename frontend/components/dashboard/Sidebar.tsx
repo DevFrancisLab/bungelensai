@@ -6,10 +6,11 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Home, TrendingUp, Upload, Bookmark, Settings, ChevronLeft, ChevronRight } from 'lucide-react'
 
 type Props = {
-  activeSection: 'dashboard' | 'trending' | 'upload' | 'saved' | 'settings'
-  onSelect: (v: 'dashboard' | 'trending' | 'upload' | 'saved' | 'settings') => void
+  activeSection: 'dashboard' | 'trending' | 'upload' | 'history' | 'settings'
+  onSelect: (v: 'dashboard' | 'trending' | 'upload' | 'history' | 'settings') => void
   collapsed?: boolean
   setCollapsed?: React.Dispatch<React.SetStateAction<boolean>>
+  onNewConversation?: () => void
 }
 
 export default function Sidebar({ activeSection, onSelect, collapsed = false, setCollapsed }: Props) {
@@ -46,7 +47,12 @@ export default function Sidebar({ activeSection, onSelect, collapsed = false, se
                 <div className="text-sm text-muted-foreground">Dashboard</div>
               </div>
 
-            {/* Toggle positioned absolutely so it's always visible */}
+            {/* New Chat and Toggle positioned absolutely so they're always visible */}
+            <div className="absolute right-12 top-3 z-20">
+              {!isCollapsed && (
+                <button onClick={() => onNewConversation && onNewConversation()} className="bg-primary text-primary-foreground px-3 py-1 rounded-md text-sm">+ New Chat</button>
+              )}
+            </div>
             <button
               aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
               onClick={toggle}
@@ -61,7 +67,7 @@ export default function Sidebar({ activeSection, onSelect, collapsed = false, se
               { key: 'dashboard', label: 'Dashboard', Icon: Home },
               { key: 'trending', label: 'Trending Topics', Icon: TrendingUp },
               { key: 'upload', label: 'Upload Documents', Icon: Upload },
-              { key: 'saved', label: 'Saved Insights', Icon: Bookmark },
+              { key: 'history', label: 'Chat History', Icon: Bookmark },
               { key: 'settings', label: 'Settings', Icon: Settings },
             ].map((item) => {
               const isActive = activeSection === (item.key as Props['activeSection'])

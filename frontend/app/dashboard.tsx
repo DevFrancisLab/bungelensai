@@ -5,12 +5,85 @@ import Sidebar from '@/components/dashboard/Sidebar'
 import MainContent from '@/components/dashboard/MainContent'
 import RightPanel from '@/components/dashboard/RightPanel'
 
-export type SectionKey = 'dashboard' | 'trending' | 'upload' | 'saved' | 'settings'
+export type SectionKey = 'dashboard' | 'trending' | 'upload' | 'history' | 'settings'
 
 export default function Dashboard() {
   const [activeSection, setActiveSection] = useState<SectionKey>('dashboard')
   const [collapsed, setCollapsed] = useState<boolean>(false)
   const [rightVisible, setRightVisible] = useState<boolean>(true)
+
+  // Conversations state (mock-only). Each conversation stores messages and metadata.
+  const [conversations, setConversations] = useState<Array<any>>(() => {
+    // sample mock conversations
+    const now = Date.now()
+    return [
+      {
+        id: 'c1',
+        title: 'Finance Bill summary',
+        lastUpdated: new Date(now - 1000 * 60 * 30).toISOString(),
+        messages: [
+          { id: 'm1', role: 'user', text: 'Summarize the Finance Bill' },
+          { id: 'm2', role: 'assistant', aiResponse: { summary: 'The Finance Bill focuses...', keyInsights: ['insight1'], citizenImpact: 'Impact...', tags: ['Finance'] } }
+        ],
+        topics: ['Finance']
+      },
+      {
+        id: 'c2',
+        title: 'Healthcare discussion',
+        lastUpdated: new Date(now - 1000 * 60 * 60 * 26).toISOString(),
+        messages: [
+          { id: 'm3', role: 'user', text: 'What was discussed about healthcare?' },
+          { id: 'm4', role: 'assistant', aiResponse: { summary: 'Healthcare debate...', keyInsights: ['insight a'], citizenImpact: 'Impact...', tags: ['Healthcare'] } }
+        ],
+        topics: ['Healthcare']
+      }
+    ]
+  })
+
+  const [currentConversationId, setCurrentConversationId] = useState<string | null>(null)
+  const [messages, setMessages] = useState<any[]>([])
+  const [hasStarted, setHasStarted] = useState<boolean>(false)
+
+  // helpers
+  function newConversation() {
+    const id = 'c-' + Date.now()
+    const conv = { id, title: 'New conversation', lastUpdated: new Date().toISOString(), messages: [], topics: [] }
+    setConversations((c) => [conv, ...c])
+    setCurrentConversationId(id)
+    setMessages([])
+    setHasStarted(false)
+    setActiveSection('dashboard')
+  }
+
+  function loadConversation(id: string) {
+    const conv = conversations.find((c) => c.id === id)
+    if (!conv) return
+    setCurrentConversationId(id)
+    setMessages(conv.messages || [])
+    setHasStarted((conv.messages || []).length > 0)
+    setActiveSection('dashboard')
+  }
+
+  function saveConversationMeta(id: string, updated: any) {
+    setConversations((list) => list.map((c) => (c.id === id ? { ...c, ...updated } : c)))
+  }
+
+  // whenever messages change, update the current conversation metadata
+  useEffect(() => {
+    if (!currentConversationId) return
+    saveConversationMeta(currentConversationId, { messages, lastUpdated: new Date().toISOString(), title: messages.find((m) => m.role === 'user')?.text?.slice(0, 60) || 'Conversation' , topics: [] })
+  }, [messages, currentConversationId])
+
+  // Ensure we have a conversation id when user starts chatting
+  useEffect(() => {
+    if (hasStarted && !currentConversationId) {
+      // create a new conversation and attach current messages
+      const id = 'c-' + Date.now()
+      const conv = { id, title: messages.find((m: any) => m.role === 'user')?.text?.slice(0,60) || 'Conversation', lastUpdated: new Date().toISOString(), messages: messages || [], topics: [] }
+      setConversations((c) => [conv, ...c])
+      setCurrentConversationId(id)
+    }
+  }, [hasStarted, currentConversationId, messages])
 
   // Prevent the browser window from scrolling while dashboard is mounted.
   useEffect(() => {
@@ -55,12 +128,21 @@ export default function Dashboard() {
               <>
                 {/* Left sidebar */}
                 <div className={`shrink-0 transition-all duration-200 ease-in-out ${collapsed ? 'w-[72px]' : 'w-60'}`}>
-                  <Sidebar activeSection={activeSection} onSelect={setActiveSection} collapsed={collapsed} setCollapsed={setCollapsed} />
+                  <Sidebar activeSection={activeSection} onSelect={setActiveSection} collapsed={collapsed} setCollapsed={setCollapsed} onNewConversation={newConversation} />
                 </div>
 
                 {/* Main content area (primary) */}
                 <div className={`flex-1 min-h-0`}>
-                  <MainContent activeSection={activeSection} />
+                  <MainContent
+                    activeSection={activeSection}
+                    messages={messages}
+                    setMessages={setMessages}
+                    hasStarted={hasStarted}
+                    setHasStarted={setHasStarted}
+                    conversations={conversations}
+                    onOpenConversation={(id: string) => loadConversation(id)}
+                    onNewConversation={() => newConversation()}
+                  />
                 </div>
 
                 {/* Right insights panel (render only on large screens) */}

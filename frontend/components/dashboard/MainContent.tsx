@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react'
 import TrendingTopicsView from './TrendingTopicsView'
-import SavedInsightsView from './SavedInsightsView'
+import ChatHistoryView from './ChatHistoryView'
 import SettingsView from './SettingsView'
 import DashboardView from './DashboardView'
 import UploadDocumentsView from './UploadDocumentsView'
@@ -21,11 +21,9 @@ const initialMessages: Message[] = []
 
 type SectionKey = 'dashboard' | 'trending' | 'upload' | 'saved' | 'settings'
 
-export default function MainContent({ activeSection = 'dashboard' }: { activeSection?: SectionKey }) {
-  const [messages, setMessages] = useState<Message[]>(initialMessages)
+export default function MainContent({ activeSection = 'dashboard', messages = [], setMessages, hasStarted = false, setHasStarted, conversations = [], onOpenConversation, onNewConversation }: { activeSection?: SectionKey, messages?: Message[], setMessages?: (m: Message[] | ((prev: Message[]) => Message[])) => void, hasStarted?: boolean, setHasStarted?: (s: boolean) => void, conversations?: any[], onOpenConversation?: (id: string) => void, onNewConversation?: () => void }) {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const [suggestion, setSuggestion] = useState<string | undefined>(undefined)
-  const [started, setStarted] = useState<boolean>(false)
   const [documents, setDocuments] = useState<Array<{ id: string; name: string; date: string; status: string; topics: string[] }>>([])
   const [viewVisible, setViewVisible] = useState(true)
 
@@ -57,14 +55,14 @@ export default function MainContent({ activeSection = 'dashboard' }: { activeSec
   }, [messages])
 
   function handleSend(text: string) {
-    // mark conversation as started when user sends their first message
-    setStarted(true)
+    // mark conversation as started
+    setHasStarted && setHasStarted(true)
     const userMessage: Message = { id: String(Date.now()), role: 'user', text }
-    setMessages((m) => [...m, userMessage])
+    setMessages && setMessages((m: Message[]) => [...(m || []), userMessage])
     // append a typing indicator message
     const typingId = 'typing-' + Date.now()
     const typingMessage: Message = { id: typingId, role: 'assistant', typing: true }
-    setMessages((m) => [...m, typingMessage])
+    setMessages && setMessages((m: Message[]) => [...(m || []), typingMessage])
 
     // generate a realistic, keyword-based mock response
     const query = text.toLowerCase()
@@ -74,7 +72,7 @@ export default function MainContent({ activeSection = 'dashboard' }: { activeSec
       const aiResponse = generateMockResponse(query)
 
       // replace typing message with actual response
-      setMessages((m) => m.map((msg) => (msg.id === typingId ? { id: String(Date.now()), role: 'assistant', aiResponse } : msg)))
+      setMessages && setMessages((m: Message[]) => (m || []).map((msg) => (msg.id === typingId ? { id: String(Date.now()), role: 'assistant', aiResponse } : msg)))
     }, responseDelay)
   }
 
@@ -158,27 +156,27 @@ export default function MainContent({ activeSection = 'dashboard' }: { activeSec
     <div className="relative h-full overflow-hidden min-h-0">
       {/* Dashboard (assistant) */}
         <div className={
-        `absolute inset-0 h-full transition-all duration-250 ease-in-out transform ${activeSection === 'dashboard' ? 'opacity-100 translate-y-0 z-10' : 'opacity-0 -translate-y-2 pointer-events-none z-0'}`
-      } aria-hidden={activeSection !== 'dashboard'}>
-          <DashboardView
-          messages={messages}
-          containerRef={containerRef}
-          suggestion={suggestion}
-          setSuggestion={(s) => {
-            // populate the input
-            setSuggestion(s)
-            if (s) {
-              // mark started and immediately send the suggestion as a message
-              setStarted(true)
-              handleSend(s)
-            }
-          }}
-          handleSend={handleSend}
-          documents={documents}
-          handleFiles={handleFiles}
-          hasStarted={started}
-        />
-      </div>
+          `absolute inset-0 h-full transition-all duration-250 ease-in-out transform ${activeSection === 'dashboard' ? 'opacity-100 translate-y-0 z-10' : 'opacity-0 -translate-y-2 pointer-events-none z-0'}`
+        } aria-hidden={activeSection !== 'dashboard'}>
+            <DashboardView
+            messages={messages}
+            containerRef={containerRef}
+            suggestion={suggestion}
+            setSuggestion={(s) => {
+              // populate the input
+              setSuggestion(s)
+              if (s) {
+                // mark started and immediately send the suggestion as a message
+                setHasStarted && setHasStarted(true)
+                handleSend(s)
+              }
+            }}
+            handleSend={handleSend}
+            documents={documents}
+            handleFiles={handleFiles}
+            hasStarted={hasStarted}
+          />
+        </div>
 
       {/* Trending */}
       <div className={
@@ -196,9 +194,11 @@ export default function MainContent({ activeSection = 'dashboard' }: { activeSec
 
       {/* Saved */}
       <div className={
-        `absolute inset-0 h-full transition-all duration-250 ease-in-out transform ${activeSection === 'saved' ? 'opacity-100 translate-y-0 z-10' : 'opacity-0 -translate-y-2 pointer-events-none z-0'}`
-      } aria-hidden={activeSection !== 'saved'}>
-        <SavedInsightsView />
+        `absolute inset-0 h-full transition-all duration-250 ease-in-out transform ${activeSection === 'history' ? 'opacity-100 translate-y-0 z-10' : 'opacity-0 -translate-y-2 pointer-events-none z-0'}`
+      } aria-hidden={activeSection !== 'history'}>
+        <div className="p-2">
+          <ChatHistoryView conversations={conversations} onOpen={(id: string) => onOpenConversation && onOpenConversation(id)} />
+        </div>
       </div>
 
       {/* Settings */}
