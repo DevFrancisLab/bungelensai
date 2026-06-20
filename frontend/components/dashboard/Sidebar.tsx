@@ -38,7 +38,7 @@ function Sidebar({ activeSection, onSelect, collapsed = false, setCollapsed }: P
   // auth + guest helpers for profile actions
   const auth = useAuthModal()
   const guest = useGuestModal()
-  const { user, logout } = useAuth()
+  const { user, logout, accessToken } = useAuth()
 
   function getInitials(u: any) {
     if (!u) return 'U'
@@ -68,12 +68,10 @@ function Sidebar({ activeSection, onSelect, collapsed = false, setCollapsed }: P
     return 'You'
   }
 
-  // Try to recover a minimal user object from stored access token when `user` is not yet populated.
-  function getUserFromToken() {
-    if (typeof window === 'undefined') return null
+  // Try to recover a minimal user object from the in-memory access token when `user` is not yet populated.
+  function getUserFromToken(token?: string) {
+    if (!token) return null
     try {
-      const token = localStorage.getItem('accessToken')
-      if (!token) return null
       const parts = token.split('.')
       if (parts.length < 2) return null
       const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')))
@@ -88,7 +86,7 @@ function Sidebar({ activeSection, onSelect, collapsed = false, setCollapsed }: P
     }
   }
 
-  const displayUser = user || getUserFromToken()
+  const displayUser = user || getUserFromToken(accessToken)
 
   function toggle() {
     if (controlled) setCollapsed && setCollapsed((s) => !s)

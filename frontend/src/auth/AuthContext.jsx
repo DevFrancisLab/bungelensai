@@ -12,8 +12,8 @@ export function useAuth() {
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
-  const [accessToken, setAccessToken] = useState(() => (typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null))
-  const [isAuthenticated, setIsAuthenticated] = useState(() => !!(typeof window !== 'undefined' && localStorage.getItem('accessToken')))
+  const [accessToken, setAccessToken] = useState(null)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [loading, setLoading] = useState(true)
 
   // helper to set tokens in memory + axios defaults
@@ -31,32 +31,21 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     async function init() {
       try {
-        const storedAccess = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null
-        const storedRefresh = typeof window !== 'undefined' ? localStorage.getItem('refreshToken') : null
-        if (storedAccess) {
-          // set axios header for initial requests
-          api.defaults.headers.common.Authorization = `Bearer ${storedAccess}`
-          setAccessToken(storedAccess)
-          setIsAuthenticated(true)
-
-          // Optionally, try to fetch user profile if you have an endpoint (not required)
+        // Attempt to refresh access token using HttpOnly refresh cookie (if present)
+        try {
+          const tokens = await authService.refreshToken()
+          applyTokens(tokens)
+          // If refresh succeeded, try to load profile
           try {
             const resp = await api.get('/auth/profile/')
             setUser(resp.data)
-          } catch (err) {
-            // profile endpoint may not exist; ignore silently
-          }
-        } else if (storedRefresh) {
-          // try refresh once
-          try {
-            const tokens = await authService.refreshToken()
-            applyTokens(tokens)
           } catch (e) {
-            // refresh failed
-            authService.clearAuthTokens && authService.clearAuthTokens()
-            setIsAuthenticated(false)
-            setUser(null)
+            // ignore profile fetch errors
           }
+        } catch (e) {
+          // no valid refresh cookie or refresh failed; remain logged out
+          setIsAuthenticated(false)
+          setUser(null)
         }
       } finally {
         setLoading(false)
@@ -69,8 +58,8 @@ export function AuthProvider({ children }) {
   // register wrapper
   async function register(email, password) {
     const data = await authService.register(email, password)
-    if (data.tokens) {
-      applyTokens({ access: data.tokens.access })
+    if (data.access) {
+      applyTokens({ access: data.access })
     }
     if (data.user) setUser(data.user)
     return data
@@ -79,8 +68,8 @@ export function AuthProvider({ children }) {
   // login wrapper
   async function login(email, password) {
     const data = await authService.login(email, password)
-    if (data.tokens) {
-      applyTokens({ access: data.tokens.access })
+    if (data.access) {
+      applyTokens({ access: data.access })
     }
     // If backend returns user, store it; otherwise try to fetch profile
     if (data.user) setUser(data.user)
@@ -96,8 +85,10 @@ export function AuthProvider({ children }) {
   }
 
   // logout wrapper
-  function logout() {
-    authService.logout()
+  async function logout() {
+    try {
+      await authService.logout()
+    } catch (e) {}
     setUser(null)
     setAccessToken(null)
     setIsAuthenticated(false)

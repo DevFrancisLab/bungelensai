@@ -3,36 +3,11 @@ import axios from 'axios'
 // Base URL for Django backend API. Use Vite env var `VITE_API_BASE_URL` in browser builds.
 const API_BASE_URL = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE_URL) || 'http://localhost:8000/api'
 
-// Local storage keys (changeable in one place)
-const ACCESS_TOKEN_KEY = 'accessToken'
-const REFRESH_TOKEN_KEY = 'refreshToken'
-
-function getAccessToken() {
-  if (typeof window === 'undefined') return null
-  return localStorage.getItem(ACCESS_TOKEN_KEY)
-}
-
-function getRefreshToken() {
-  if (typeof window === 'undefined') return null
-  return localStorage.getItem(REFRESH_TOKEN_KEY)
-}
-
-function setTokens({ access, refresh }) {
-  if (typeof window === 'undefined') return
-  if (access) localStorage.setItem(ACCESS_TOKEN_KEY, access)
-  if (refresh) localStorage.setItem(REFRESH_TOKEN_KEY, refresh)
-}
-
-function clearTokens() {
-  if (typeof window === 'undefined') return
-  localStorage.removeItem(ACCESS_TOKEN_KEY)
-  localStorage.removeItem(REFRESH_TOKEN_KEY)
-}
-
-// Create axios instance
+// Create axios instance — send cookies with every request so server can read HttpOnly refresh cookie
 const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10000,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
     Accept: 'application/json',
@@ -55,18 +30,8 @@ const processQueue = (error, token = null) => {
   failedQueue = []
 }
 
-// Request interceptor: attach access token when available
-api.interceptors.request.use(
-  (config) => {
-    const token = getAccessToken()
-    if (token) {
-      config.headers = config.headers || {}
-      config.headers.Authorization = `Bearer ${token}`
-    }
-    return config
-  },
-  (error) => Promise.reject(error),
-)
+// Request interceptor: do not read localStorage; Authorization header should be set by AuthContext when access token is available in memory.
+api.interceptors.request.use((config) => config, (error) => Promise.reject(error))
 
 // Response interceptor: try refreshing tokens on 401
 api.interceptors.response.use(
@@ -106,28 +71,19 @@ api.interceptors.response.use(
     originalRequest._retry = true
     isRefreshing = true
 
-    const refreshToken = getRefreshToken()
-
-    if (!refreshToken) {
-      clearTokens()
-      isRefreshing = false
-      return Promise.reject(error)
-    }
-
-    // attempt token refresh
+    // attempt token refresh — server will read HttpOnly cookie and return new access (and set a new refresh cookie)
     refreshPromise = api
-      .post('/auth/token/refresh/', { refresh: refreshToken })
+      .post('/auth/token/refresh/', {})
       .then((res) => {
-        const { access, refresh } = res.data || {}
+        const access = res.data?.access
         if (!access) throw new Error('No access token in refresh response')
-        setTokens({ access, refresh })
         api.defaults.headers.common.Authorization = `Bearer ${access}`
         processQueue(null, access)
         return access
       })
       .catch((err) => {
         processQueue(err, null)
-        clearTokens()
+        // no local tokens to clear; consumer should handle logged-out state
         throw err
       })
       .finally(() => {
@@ -137,6 +93,7 @@ api.interceptors.response.use(
 
     try {
       const newAccess = await refreshPromise
+      originalRequest.headers = originalRequest.headers || {}
       originalRequest.headers.Authorization = `Bearer ${newAccess}`
       return api(originalRequest)
     } catch (err) {
