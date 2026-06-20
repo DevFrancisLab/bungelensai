@@ -150,8 +150,8 @@ export default function Dashboard() {
   // No portal: ChatInput is rendered inside the dashboard layout (DashboardView)
 
   return (
-    <main className="flex flex-col h-screen bg-background text-foreground overflow-hidden">
-      <section className="max-w-7xl mx-auto px-6 py-6 flex-1 min-h-0">
+    <main className="flex flex-col h-screen bg-background text-foreground overflow-hidden w-full">
+      <section className="w-full px-6 py-6 flex-1 min-h-0">
         {/* Guest banner (shown for temporary guest sessions) */}
         <GuestBanner onRequestAuth={handleRequestAuth} />
 

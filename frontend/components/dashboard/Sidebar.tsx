@@ -31,7 +31,7 @@ function Sidebar({ activeSection, onSelect, collapsed = false, setCollapsed }: P
   }
 
   return (
-    <aside className={`lg:sticky lg:top-6 lg:self-start transition-all duration-200`}> 
+    <aside className={`lg:sticky lg:top-6 lg:self-start transition-all duration-200 border-r border-accent/10`}>
       <nav
         role="navigation"
         aria-label="Dashboard sidebar"
