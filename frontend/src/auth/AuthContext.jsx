@@ -53,6 +53,34 @@ export function AuthProvider({ children }) {
     }
 
     init()
+
+    // Listen for access token updates from axios refresh handler
+    function handleAccessUpdated(e) {
+      try {
+        const access = e?.detail
+        if (access) {
+          applyTokens({ access })
+        }
+      } catch (err) {}
+    }
+
+    function handleRefreshFailed() {
+      // Silent logout without extra UI flicker
+      try {
+        // clear client state
+        setUser(null)
+        setAccessToken(null)
+        setIsAuthenticated(false)
+        delete api.defaults.headers.common.Authorization
+      } catch (e) {}
+    }
+
+    window.addEventListener('auth:access-updated', handleAccessUpdated)
+    window.addEventListener('auth:refresh-failed', handleRefreshFailed)
+    return () => {
+      window.removeEventListener('auth:access-updated', handleAccessUpdated)
+      window.removeEventListener('auth:refresh-failed', handleRefreshFailed)
+    }
   }, [applyTokens])
 
   // register wrapper

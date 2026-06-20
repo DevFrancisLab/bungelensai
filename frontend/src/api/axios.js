@@ -45,11 +45,10 @@ api.interceptors.response.use(
     }
 
     // Avoid retrying token refresh endpoint itself
-    if (originalRequest.url && originalRequest.url.includes('/auth/token/refresh')) {
-      // refresh attempt failed -> clear tokens and reject
-      clearTokens()
-      return Promise.reject(error)
-    }
+      if (originalRequest.url && originalRequest.url.includes('/auth/token/refresh')) {
+        // refresh attempt failed or original request was the refresh endpoint; do not try to refresh again
+        return Promise.reject(error)
+      }
 
     if (originalRequest._retry) {
       // already retried
@@ -78,12 +77,19 @@ api.interceptors.response.use(
         const access = res.data?.access
         if (!access) throw new Error('No access token in refresh response')
         api.defaults.headers.common.Authorization = `Bearer ${access}`
+        // notify app that a new access token is available
+        try {
+          window.dispatchEvent(new CustomEvent('auth:access-updated', { detail: access }))
+        } catch (e) {}
         processQueue(null, access)
         return access
       })
       .catch((err) => {
         processQueue(err, null)
-        // no local tokens to clear; consumer should handle logged-out state
+        // notify app that refresh failed so it can logout silently
+        try {
+          window.dispatchEvent(new CustomEvent('auth:refresh-failed'))
+        } catch (e) {}
         throw err
       })
       .finally(() => {
