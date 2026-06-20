@@ -146,3 +146,6 @@ REST_FRAMEWORK = {
 
 # Note: Install and configure `djangorestframework-simplejwt` in your environment
 # to provide JWT authentication (SimpleJWT). Keep other default Django settings above unchanged.
+
+# Use the custom user model
+AUTH_USER_MODEL = 'accounts.CustomUser'
