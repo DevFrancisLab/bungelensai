@@ -7,7 +7,6 @@ import SettingsView from './SettingsView'
 import DashboardView from './DashboardView'
 import UploadDocumentsView from './UploadDocumentsView'
 import ChatMessage from './ChatMessage'
-import ChatInput from './ChatInput'
 import UploadCard from './UploadCard'
 import DocumentCard from './DocumentCard'
 import { Spinner } from '@/components/ui/spinner'
@@ -53,6 +52,16 @@ export default function MainContent({ activeSection = 'dashboard', messages = []
       // ensure bottom-most content is visible but account for the container height
       el.scrollTop = Math.max(0, el.scrollHeight - el.clientHeight)
     }
+  }, [messages])
+
+  // listen for dashboard-global send events (when input is rendered outside this component)
+  useEffect(() => {
+    const onGlobalSend = (e: any) => {
+      const text = e?.detail?.text
+      if (text) handleSend(text)
+    }
+    window.addEventListener('dashboard-send', onGlobalSend as EventListener)
+    return () => window.removeEventListener('dashboard-send', onGlobalSend as EventListener)
   }, [messages])
 
   function handleSend(text: string) {
@@ -208,6 +217,8 @@ export default function MainContent({ activeSection = 'dashboard', messages = []
       } aria-hidden={activeSection !== 'settings'}>
         <SettingsView />
       </div>
+      {/* Chat input moved to app/dashboard.tsx as a fixed element to avoid transform clipping */}
     </div>
   )
 }
+

@@ -2,7 +2,6 @@
 
 import React from 'react'
 import ChatMessage from './ChatMessage'
-import ChatInput from './ChatInput'
 import { Card } from '@/components/ui/card'
 
 type Message =
@@ -81,10 +80,6 @@ export default function DashboardView({
                 ),
               )
             )}
-          </div>
-
-          <div className="absolute left-0 right-0 bottom-0 border-t px-6 py-4 bg-background/60 z-20">
-            <ChatInput onSend={handleSend} suggestion={suggestion} />
           </div>
         </div>
       )}

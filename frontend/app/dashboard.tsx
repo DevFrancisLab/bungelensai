@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import Sidebar from '@/components/dashboard/Sidebar'
 import MainContent from '@/components/dashboard/MainContent'
 import RightPanel from '@/components/dashboard/RightPanel'
@@ -208,22 +209,28 @@ export default function Dashboard() {
           })()}
         </div>
       </section>
-      {/* Fixed chat input for dashboard — dispatches a global event handled by MainContent */}
-      {activeSection === 'dashboard' && hasStarted ? (
-        <div className="fixed left-0 right-0 bottom-4 z-40 pointer-events-auto">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="mx-auto">
-              <ChatInput onSend={(text: string) => {
-                try {
-                  window.dispatchEvent(new CustomEvent('dashboard-send', { detail: { text } }))
-                } catch (e) {
-                  // fallback: nothing
-                }
-              }} />
-            </div>
-          </div>
-        </div>
-      ) : null}
+      {/* Fixed chat input for dashboard — render into document.body via portal so it's
+          not affected by transformed ancestors (avoids clipping/pushing issues) */}
+      {activeSection === 'dashboard' && hasStarted
+        ? createPortal(
+            <div className="fixed left-0 right-0 bottom-4 z-40 pointer-events-auto">
+              <div className="max-w-7xl mx-auto px-6">
+                <div className="mx-auto">
+                  <ChatInput
+                    onSend={(text: string) => {
+                      try {
+                        window.dispatchEvent(new CustomEvent('dashboard-send', { detail: { text } }))
+                      } catch (e) {
+                        // fallback: nothing
+                      }
+                    }}
+                  />
+                </div>
+              </div>
+            </div>,
+            typeof document !== 'undefined' ? document.body : null,
+          )
+        : null}
     </main>
   )
 }
