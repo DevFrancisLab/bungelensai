@@ -62,32 +62,34 @@ export default function DashboardView({
           </form>
         </div>
       ) : (
-        // Conversational workspace
-        <div className="relative flex-1 min-h-[70vh]">
-          <div ref={containerRef} className="absolute inset-0 overflow-auto px-6 pt-6 pb-36 space-y-6">
-            {messages.length === 0 ? (
-              <div className="p-8 text-center text-muted-foreground">Start the conversation by asking about bills, debates, or members.</div>
-            ) : (
-              messages.map((m) =>
-                m.role === 'user' ? (
-                  <ChatMessage key={m.id} role="user" text={m.text} />
-                ) : (
-                  <ChatMessage
-                    key={m.id}
-                    role="assistant"
-                    typing={m.typing}
-                    aiResponse={m.aiResponse}
-                  />
-                ),
-              )
-            )}
-          </div>
+        // Conversational workspace: make the scroll container wrap both messages and the input
+        // so the input can be sticky relative to that container instead of the viewport.
+        <div className="flex flex-col flex-1 min-h-0">
+          <div ref={containerRef} className="relative flex-1 overflow-auto px-6 pt-6 pb-6">
+            <div className="space-y-6 pb-24">
+              {messages.length === 0 ? (
+                <div className="p-8 text-center text-muted-foreground">Start the conversation by asking about bills, debates, or members.</div>
+              ) : (
+                messages.map((m) =>
+                  m.role === 'user' ? (
+                    <ChatMessage key={m.id} role="user" text={m.text} />
+                  ) : (
+                    <ChatMessage
+                      key={m.id}
+                      role="assistant"
+                      typing={m.typing}
+                      aiResponse={m.aiResponse}
+                    />
+                  ),
+                )
+              )}
+            </div>
 
-          {/* Chat input rendered inside the dashboard layout. It is positioned
-              absolutely at the bottom of this relative container so it remains
-              visible while the messages (containerRef) scroll independently. */}
-          <div className="absolute left-0 right-0 bottom-4 px-6 pointer-events-auto z-40">
-            <ChatInput onSend={(text: string) => handleSend(text)} />
+            {/* Chat input rendered inside the same scroll container. Sticky will now be
+                relative to `containerRef` (the scrollable element) instead of the viewport. */}
+            <div className="sticky bottom-0 left-0 right-0 px-6 pb-6 pt-2 pointer-events-auto z-40 bg-transparent">
+              <ChatInput onSend={(text: string) => handleSend(text)} />
+            </div>
           </div>
         </div>
       )}

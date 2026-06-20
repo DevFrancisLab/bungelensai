@@ -150,15 +150,15 @@ export default function Dashboard() {
   // No portal: ChatInput is rendered inside the dashboard layout (DashboardView)
 
   return (
-    <main className="h-screen bg-background text-foreground overflow-hidden">
-      <section className="max-w-7xl mx-auto px-6 py-6 h-full">
+    <main className="flex flex-col h-screen bg-background text-foreground overflow-hidden">
+      <section className="max-w-7xl mx-auto px-6 py-6 flex-1 min-h-0">
         {/* Guest banner (shown for temporary guest sessions) */}
         <GuestBanner onRequestAuth={handleRequestAuth} />
 
         {/* If user completes mock auth and there is a preserved conversation, restore it */}
         {/* Restoration runs in an effect below */}
 
-        <div className="flex flex-col lg:flex-row gap-8 h-full transition-all duration-200 ease-in-out">
+        <div className="flex flex-col lg:flex-row gap-8 flex-1 min-h-0 transition-all duration-200 ease-in-out">
           {/* compute responsive column spans */}
           {/**
            * sidebarSpan: 2 when collapsed, otherwise 3

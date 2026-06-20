@@ -41,15 +41,11 @@ function Sidebar({ activeSection, onSelect, collapsed = false, setCollapsed }: P
           <div className="flex items-center gap-3 mb-6">
             <div className={`w-12 h-12 rounded-lg bg-primary flex items-center justify-center shadow-sm ${isCollapsed ? 'w-10 h-10' : 'w-12 h-12'}`}>
                 <span className="text-primary-foreground font-bold">B</span>
-              </div>
-              <div className={`ml-3 transition-all duration-200 ${isCollapsed ? 'opacity-0 max-w-0 overflow-hidden' : 'opacity-100 max-w-full'}`}>
-                <div className="font-semibold">BungeLens AI</div>
-                <div className="text-sm text-muted-foreground">New Chat</div>
-              </div>
+            </div>
             <button
               aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
               onClick={toggle}
-              className="absolute right-3 top-3 rounded-full p-1 hover:bg-accent/5 transition-colors z-20"
+              className="ml-auto rounded-full p-1 hover:bg-accent/5 transition-colors z-20"
             >
               {isCollapsed ? <ChevronRight className="size-4" /> : <ChevronLeft className="size-4" />}
             </button>
