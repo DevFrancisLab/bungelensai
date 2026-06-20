@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Home, TrendingUp, Upload, Bookmark, Settings, ChevronLeft, ChevronRight } from 'lucide-react'
+import { MessageSquare, TrendingUp, Upload, Bookmark, Settings, ChevronLeft, ChevronRight } from 'lucide-react'
 
 type Props = {
   activeSection: 'dashboard' | 'trending' | 'upload' | 'history' | 'settings'
@@ -44,15 +44,8 @@ export default function Sidebar({ activeSection, onSelect, collapsed = false, se
               </div>
               <div className={`ml-3 transition-all duration-200 ${isCollapsed ? 'opacity-0 max-w-0 overflow-hidden' : 'opacity-100 max-w-full'}`}>
                 <div className="font-semibold">BungeLens AI</div>
-                <div className="text-sm text-muted-foreground">Dashboard</div>
+                <div className="text-sm text-muted-foreground">New Chat</div>
               </div>
-
-            {/* New Chat and Toggle positioned absolutely so they're always visible */}
-            <div className="absolute right-12 top-3 z-20">
-              {!isCollapsed && (
-                <button onClick={() => onNewConversation && onNewConversation()} className="bg-primary text-primary-foreground px-3 py-1 rounded-md text-sm">+ New Chat</button>
-              )}
-            </div>
             <button
               aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
               onClick={toggle}
@@ -64,7 +57,7 @@ export default function Sidebar({ activeSection, onSelect, collapsed = false, se
 
           <ul className="space-y-2">
             {[
-              { key: 'dashboard', label: 'Dashboard', Icon: Home },
+              { key: 'dashboard', label: 'New Chat', Icon: MessageSquare },
               { key: 'trending', label: 'Trending Topics', Icon: TrendingUp },
               { key: 'upload', label: 'Upload Documents', Icon: Upload },
               { key: 'history', label: 'Chat History', Icon: Bookmark },
