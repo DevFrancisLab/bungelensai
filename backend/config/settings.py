@@ -127,12 +127,19 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 # CORS configuration
-# Allow the frontend running on localhost:3000 to access this API during development.
+# CORS configuration
+# Allow the frontend running on common dev ports to access this API during development.
+# When sending cookies (withCredentials), the Access-Control-Allow-Origin header
+# must be a specific origin (not '*') and Access-Control-Allow-Credentials must be True.
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
+    'http://localhost:5173',
 ]
-# For local development convenience, enable allow-all when DEBUG=True. Disable in production.
-CORS_ALLOW_ALL_ORIGINS = bool(DEBUG)
+# Do NOT use wildcard origins when using credentials. Keep this False in dev too so
+# the exact origin header is returned. In production add your real frontend origin(s).
+CORS_ALLOW_ALL_ORIGINS = False
+# Allow cookies (HttpOnly refresh cookie) to be sent/received cross-origin
+CORS_ALLOW_CREDENTIALS = True
 
 # Django REST Framework configuration
 REST_FRAMEWORK = {
