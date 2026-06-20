@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { useAuthModal } from '@/context/auth-context'
 import { useGuestModal } from '@/context/guest-context'
@@ -8,6 +9,7 @@ import { useGuestModal } from '@/context/guest-context'
 export default function Header() {
   const { open } = useAuthModal()
   const { startGuestSession } = useGuestModal()
+  const navigate = useNavigate()
   // Avoid importing `next/navigation` under Vite; determine pathname from window
   const [scrolled, setScrolled] = useState<boolean>(false)
 
@@ -26,10 +28,9 @@ export default function Header() {
 
   function navigateToDashboard() {
     try {
-      window.history.pushState({}, '', '/dashboard')
-      window.dispatchEvent(new PopStateEvent('popstate'))
+      navigate('/dashboard')
     } catch (e) {
-      window.location.href = '/dashboard'
+      try { window.location.href = '/dashboard' } catch (_) {}
     }
   }
 

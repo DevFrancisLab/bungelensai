@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
 import TrendingTopicsView from './TrendingTopicsView'
 import ChatHistoryView from './ChatHistoryView'
 import SettingsView from './SettingsView'
@@ -18,15 +18,17 @@ type Message =
 
 const initialMessages: Message[] = []
 
-type SectionKey = 'dashboard' | 'trending' | 'upload' | 'saved' | 'settings'
+type SectionKey = 'dashboard' | 'trending' | 'upload' | 'history' | 'settings'
 
-export default function MainContent({ activeSection = 'dashboard', messages = [], setMessages, hasStarted = false, setHasStarted, conversations = [], onOpenConversation, onNewConversation }: { activeSection?: SectionKey, messages?: Message[], setMessages?: (m: Message[] | ((prev: Message[]) => Message[])) => void, hasStarted?: boolean, setHasStarted?: (s: boolean) => void, conversations?: any[], onOpenConversation?: (id: string) => void, onNewConversation?: () => void }) {
+function MainContent({ activeSection = 'dashboard', messages = [], setMessages, hasStarted = false, setHasStarted, conversations = [], onOpenConversation, onNewConversation }: { activeSection?: SectionKey, messages?: Message[], setMessages?: (m: Message[] | ((prev: Message[]) => Message[])) => void, hasStarted?: boolean, setHasStarted?: (s: boolean) => void, conversations?: any[], onOpenConversation?: (id: string) => void, onNewConversation?: () => void }) {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const [suggestion, setSuggestion] = useState<string | undefined>(undefined)
   const [documents, setDocuments] = useState<Array<{ id: string; name: string; date: string; status: string; topics: string[] }>>([])
   const [viewVisible, setViewVisible] = useState(true)
+  const mountedRef = useRef(true)
+  const timersRef = useRef<number[]>([])
 
-  function handleFiles(files: File[]) {
+  const handleFiles = useCallback((files: File[]) => {
     // Add each file to documents with status 'Uploaded' then simulate processing and analysis
     files.forEach((file) => {
       const id = String(Date.now()) + '-' + file.name
@@ -34,17 +36,21 @@ export default function MainContent({ activeSection = 'dashboard', messages = []
       setDocuments((d) => [doc, ...d])
 
       // simulate processing
-      setTimeout(() => {
+      const t1 = window.setTimeout(() => {
+        if (!mountedRef.current) return
         setDocuments((d) => d.map((x) => x.id === id ? { ...x, status: 'Processing' } : x))
 
         // simulate AI analysis
-        setTimeout(() => {
+        const t2 = window.setTimeout(() => {
+          if (!mountedRef.current) return
           const topics = ['Education', 'Budget', 'Healthcare'].slice(0, Math.max(1, Math.floor(Math.random() * 3)))
           setDocuments((d) => d.map((x) => x.id === id ? { ...x, status: 'Complete', topics } : x))
         }, 1200)
+        timersRef.current.push(t2)
       }, 600)
+      timersRef.current.push(t1)
     })
-  }
+  }, [])
 
   useEffect(() => {
     const el = containerRef.current
@@ -52,46 +58,54 @@ export default function MainContent({ activeSection = 'dashboard', messages = []
       // ensure bottom-most content is visible but account for the container height
       el.scrollTop = Math.max(0, el.scrollHeight - el.clientHeight)
     }
-  }, [messages])
+    // only depend on messages length to avoid triggering on unrelated message object identity changes
+  }, [messages.length])
 
   // listen for dashboard-global send events (when input is rendered outside this component)
-  useEffect(() => {
-    const onGlobalSend = (e: any) => {
-      const text = e?.detail?.text
-      if (text) handleSend(text)
-    }
-    window.addEventListener('dashboard-send', onGlobalSend as EventListener)
-    return () => window.removeEventListener('dashboard-send', onGlobalSend as EventListener)
-  }, [messages])
+  // Previously listened for global 'dashboard-send' events when ChatInput
+  // was rendered via a portal. ChatInput is now rendered inside
+  // the dashboard layout and calls `handleSend` directly, so this
+  // global listener is no longer necessary.
 
-  function handleSend(text: string) {
+  const handleSend = useCallback((text: string) => {
     // mark conversation as started
     setHasStarted && setHasStarted(true)
     const userMessage: Message = { id: String(Date.now()), role: 'user', text }
-    setMessages && setMessages((m: Message[]) => [...(m || []), userMessage])
-    // append a typing indicator message
+    // append both user and typing indicator in one update to avoid double renders
     const typingId = 'typing-' + Date.now()
     const typingMessage: Message = { id: typingId, role: 'assistant', typing: true }
-    setMessages && setMessages((m: Message[]) => [...(m || []), typingMessage])
+    setMessages && setMessages((m: Message[]) => [...(m || []), userMessage, typingMessage])
 
     // generate a realistic, keyword-based mock response
     const query = text.toLowerCase()
     const responseDelay = 700 + Math.floor(Math.random() * 800)
 
-    setTimeout(() => {
+    const t = window.setTimeout(() => {
+      if (!mountedRef.current) return
       const aiResponse = generateMockResponse(query)
 
       // replace typing message with actual response
       setMessages && setMessages((m: Message[]) => (m || []).map((msg) => (msg.id === typingId ? { id: String(Date.now()), role: 'assistant', aiResponse } : msg)))
     }, responseDelay)
-  }
+    timersRef.current.push(t)
+  }, [setHasStarted, setMessages])
 
   // Small entrance animation when switching sections
   useEffect(() => {
     setViewVisible(false)
     const t = setTimeout(() => setViewVisible(true), 20)
     return () => clearTimeout(t)
+    // activeSection intentionally the only dependency
   }, [activeSection])
+
+  useEffect(() => {
+    return () => {
+      mountedRef.current = false
+      // clear any pending timers
+      timersRef.current.forEach((id) => window.clearTimeout(id))
+      timersRef.current = []
+    }
+  }, [])
 
 
   function generateMockResponse(query: string) {
@@ -170,9 +184,9 @@ export default function MainContent({ activeSection = 'dashboard', messages = []
         } aria-hidden={activeSection !== 'dashboard'}>
             <DashboardView
             messages={messages}
-            containerRef={containerRef}
+            containerRef={containerRef as React.RefObject<HTMLDivElement>}
             suggestion={suggestion}
-            setSuggestion={(s) => {
+            setSuggestion={useCallback((s: string | undefined) => {
               // populate the input
               setSuggestion(s)
               if (s) {
@@ -180,7 +194,7 @@ export default function MainContent({ activeSection = 'dashboard', messages = []
                 setHasStarted && setHasStarted(true)
                 handleSend(s)
               }
-            }}
+            }, [handleSend, setHasStarted])}
             handleSend={handleSend}
             documents={documents}
             handleFiles={handleFiles}
@@ -221,4 +235,6 @@ export default function MainContent({ activeSection = 'dashboard', messages = []
     </div>
   )
 }
+
+export default React.memo(MainContent)
 

@@ -13,7 +13,7 @@ type Props = {
   onNewConversation?: () => void
 }
 
-export default function Sidebar({ activeSection, onSelect, collapsed = false, setCollapsed }: Props) {
+function Sidebar({ activeSection, onSelect, collapsed = false, setCollapsed }: Props) {
   // Support both controlled (parent provides setCollapsed) and uncontrolled usage.
   const [internalCollapsed, setInternalCollapsed] = useState<boolean>(collapsed)
   const controlled = typeof setCollapsed === 'function'
@@ -99,3 +99,5 @@ export default function Sidebar({ activeSection, onSelect, collapsed = false, se
     </aside>
   )
 }
+
+export default React.memo(Sidebar)

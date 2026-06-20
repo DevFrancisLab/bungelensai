@@ -34,6 +34,14 @@ function DialogOverlay({
   className,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Overlay>) {
+  // debug overlay mount/unmount to detect lingering blocks
+  React.useEffect(() => {
+    try { console.debug('[Dialog] Overlay mounted') } catch (e) {}
+    return () => {
+      try { console.debug('[Dialog] Overlay unmounted') } catch (e) {}
+    }
+  }, [])
+
   return (
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
@@ -54,6 +62,11 @@ function DialogContent({
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean
 }) {
+  // debug mount/unmount for content
+  React.useEffect(() => {
+    try { console.debug('[Dialog] Content render') } catch (e) {}
+  }, [])
+
   return (
     <DialogPortal data-slot="dialog-portal">
       <DialogOverlay />

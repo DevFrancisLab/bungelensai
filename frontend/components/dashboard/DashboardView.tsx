@@ -3,6 +3,7 @@
 import React from 'react'
 import ChatMessage from './ChatMessage'
 import { Card } from '@/components/ui/card'
+import ChatInput from './ChatInput'
 
 type Message =
   | { id: string; role: 'user'; text: string }
@@ -80,6 +81,13 @@ export default function DashboardView({
                 ),
               )
             )}
+          </div>
+
+          {/* Chat input rendered inside the dashboard layout. It is positioned
+              absolutely at the bottom of this relative container so it remains
+              visible while the messages (containerRef) scroll independently. */}
+          <div className="absolute left-0 right-0 bottom-4 px-6 pointer-events-auto z-40">
+            <ChatInput onSend={(text: string) => handleSend(text)} />
           </div>
         </div>
       )}

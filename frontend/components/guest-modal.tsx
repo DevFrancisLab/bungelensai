@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   Dialog,
   DialogContent,
@@ -19,13 +20,13 @@ export default function GuestModal() {
   const { isOpen, close, startGuestSession } = useGuestModal()
   const { open: openAuth, setAuthMode } = useAuthModal()
   const [loading, setLoading] = useState(false)
+  const navigate = useNavigate()
 
   function navigateToDashboard() {
     try {
-      window.history.pushState({}, '', '/dashboard')
-      window.dispatchEvent(new PopStateEvent('popstate'))
+      navigate('/dashboard')
     } catch (e) {
-      window.location.href = '/dashboard'
+      try { window.location.href = '/dashboard' } catch (_) {}
     }
   }
 

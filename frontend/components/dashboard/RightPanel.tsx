@@ -6,11 +6,11 @@ import { Badge } from '@/components/ui/badge'
 import { Home, FileText, BarChart2, BookOpen, Heart, Leaf } from 'lucide-react'
 
 type Props = {
-  activeSection?: 'dashboard' | 'trending' | 'upload' | 'saved' | 'settings'
+  activeSection?: 'dashboard' | 'trending' | 'upload' | 'history' | 'settings'
   onClose?: () => void
 }
 
-export default function RightPanel({ activeSection = 'dashboard', onClose }: Props) {
+function RightPanel({ activeSection = 'dashboard', onClose }: Props) {
   const showTrending = activeSection !== 'dashboard'
 
   return (
@@ -59,3 +59,5 @@ export default function RightPanel({ activeSection = 'dashboard', onClose }: Pro
     </aside>
   )
 }
+
+export default React.memo(RightPanel)

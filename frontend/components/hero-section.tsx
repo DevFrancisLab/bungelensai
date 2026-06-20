@@ -2,15 +2,16 @@
 
 import { Button } from '@/components/ui/button'
 import { useGuestModal } from '@/context/guest-context'
+import { useNavigate } from 'react-router-dom'
 
 export default function HeroSection() {
   const { startGuestSession } = useGuestModal()
+  const navigate = useNavigate()
   function navigateToDashboard() {
     try {
-      window.history.pushState({}, '', '/dashboard')
-      window.dispatchEvent(new PopStateEvent('popstate'))
+      navigate('/dashboard')
     } catch (e) {
-      window.location.href = '/dashboard'
+      try { window.location.href = '/dashboard' } catch (_) {}
     }
   }
   return (

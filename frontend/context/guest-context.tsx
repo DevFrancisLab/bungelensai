@@ -1,6 +1,6 @@
 "use client"
 
-import React, { createContext, useContext, useState, useCallback } from "react"
+import React, { createContext, useContext, useState, useCallback, useEffect } from "react"
 
 type GuestContextType = {
   isOpen: boolean
@@ -25,6 +25,24 @@ export const GuestProvider: React.FC<React.PropsWithChildren<{}>> = ({ children 
   const startGuestSession = useCallback(() => setGuestActive(true), [])
   const endGuestSession = useCallback(() => setGuestActive(false), [])
   const setPreservedConversationFn = useCallback((c: { id?: string; title?: string; messages?: any[] } | null) => setPreservedConversation(c), [])
+
+  // Close guest modal when app requests it (programmatic navigation)
+  useEffect(() => {
+    const onClose = () => setIsOpen(false)
+    try {
+      window.addEventListener('app:close-dialogs', onClose)
+    } catch (e) {}
+    return () => {
+      try {
+        window.removeEventListener('app:close-dialogs', onClose)
+      } catch (e) {}
+    }
+  }, [])
+
+  // Debug: log guest modal open state
+  useEffect(() => {
+    try { console.debug('[GuestContext] isOpen ->', isOpen, 'guestActive ->', guestActive) } catch (e) {}
+  }, [isOpen, guestActive])
 
   return (
     <GuestContext.Provider value={{ isOpen, open, close, guestActive, startGuestSession, endGuestSession, preservedConversation, setPreservedConversation: setPreservedConversationFn }}>

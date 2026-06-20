@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Home from '@/app/page'
 import Dashboard from '@/app/dashboard'
 import { AuthProvider } from '@/context/auth-context'
@@ -7,21 +8,18 @@ import { GuestProvider } from '@/context/guest-context'
 import GuestModal from '@/components/guest-modal'
 
 export default function App() {
-  const [path, setPath] = useState<string>(typeof window !== 'undefined' ? window.location.pathname : '/')
-
-  useEffect(() => {
-    const onLocation = () => setPath(window.location.pathname)
-    window.addEventListener('popstate', onLocation)
-    return () => window.removeEventListener('popstate', onLocation)
-  }, [])
-
   return (
-    <AuthProvider>
-      <GuestProvider>
-        <AuthenticationModal />
-        <GuestModal />
-        {path === '/dashboard' ? <Dashboard /> : <Home />}
-      </GuestProvider>
-    </AuthProvider>
+    <BrowserRouter>
+      <AuthProvider>
+        <GuestProvider>
+          <AuthenticationModal />
+          <GuestModal />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+          </Routes>
+        </GuestProvider>
+      </AuthProvider>
+    </BrowserRouter>
   )
 }

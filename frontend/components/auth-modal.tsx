@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -13,13 +14,13 @@ export default function AuthenticationModal() {
   const { isOpen, close, authMode, setAuthenticated } = useAuthModal()
   const { preservedConversation } = useGuestModal()
   const [loading, setLoading] = useState(false)
+  const navigate = useNavigate()
 
   function navigateToDashboard() {
     try {
-      window.history.pushState({}, '', '/dashboard')
-      window.dispatchEvent(new PopStateEvent('popstate'))
+      navigate('/dashboard')
     } catch (e) {
-      window.location.href = '/dashboard'
+      try { window.location.href = '/dashboard' } catch (_) {}
     }
   }
 

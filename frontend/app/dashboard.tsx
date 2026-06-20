@@ -1,11 +1,9 @@
 "use client"
 
-import React, { useState, useEffect } from 'react'
-import { createPortal } from 'react-dom'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import Sidebar from '@/components/dashboard/Sidebar'
 import MainContent from '@/components/dashboard/MainContent'
 import RightPanel from '@/components/dashboard/RightPanel'
-import ChatInput from '@/components/dashboard/ChatInput'
 import GuestBanner from '@/components/guest-banner'
 import { useGuestModal } from '@/context/guest-context'
 import { useAuthModal } from '@/context/auth-context'
@@ -22,7 +20,6 @@ export default function Dashboard() {
   const [collapsed, setCollapsed] = useState<boolean>(false)
   const [rightVisible, setRightVisible] = useState<boolean>(true)
   const mainRef = React.useRef<HTMLDivElement | null>(null)
-  const [portalRect, setPortalRect] = useState<{ left: number; width: number } | null>(null)
 
   // Conversations state (mock-only). Each conversation stores messages and metadata.
   const [conversations, setConversations] = useState<Array<any>>(() => {
@@ -56,46 +53,59 @@ export default function Dashboard() {
   const [messages, setMessages] = useState<any[]>([])
   const [hasStarted, setHasStarted] = useState<boolean>(false)
 
+  const handleRequestAuth = useCallback((mode: 'signin' | 'signup') => {
+    setPreservedConversation({ id: currentConversationId ?? undefined, title: conversations.find(c => c.id === currentConversationId)?.title || undefined, messages: messages })
+    try {
+      setAuthMode(mode)
+      open()
+    } catch (e) {
+      // no-op
+    }
+  }, [currentConversationId, conversations, messages, setPreservedConversation, setAuthMode, open])
   // helpers
-  function newConversation() {
+  const newConversation = useCallback(() => {
     const id = 'c-' + Date.now()
     const conv = { id, title: 'New conversation', lastUpdated: new Date().toISOString(), messages: [], topics: [] }
     setConversations((c) => [conv, ...c])
+    // group state updates logically; React will batch these in event handlers
     setCurrentConversationId(id)
     setMessages([])
     setHasStarted(false)
     setActiveSection('dashboard')
-  }
+  }, [setConversations, setCurrentConversationId, setMessages, setHasStarted, setActiveSection])
 
-  function loadConversation(id: string) {
+  const loadConversation = useCallback((id: string) => {
     const conv = conversations.find((c) => c.id === id)
     if (!conv) return
     setCurrentConversationId(id)
     setMessages(conv.messages || [])
     setHasStarted((conv.messages || []).length > 0)
     setActiveSection('dashboard')
-  }
+  }, [conversations, setCurrentConversationId, setMessages, setHasStarted, setActiveSection])
 
-  function saveConversationMeta(id: string, updated: any) {
+  const saveConversationMeta = useCallback((id: string, updated: any) => {
     setConversations((list) => list.map((c) => (c.id === id ? { ...c, ...updated } : c)))
-  }
+  }, [setConversations])
 
   // whenever messages change, update the current conversation metadata
   useEffect(() => {
     if (!currentConversationId) return
-    saveConversationMeta(currentConversationId, { messages, lastUpdated: new Date().toISOString(), title: messages.find((m) => m.role === 'user')?.text?.slice(0, 60) || 'Conversation' , topics: [] })
-  }, [messages, currentConversationId])
+    // compute title once to avoid creating a new object every render
+    const title = messages.find((m) => (m as any).role === 'user')?.text?.slice(0, 60) || 'Conversation'
+    saveConversationMeta(currentConversationId, { messages, lastUpdated: new Date().toISOString(), title, topics: [] })
+  }, [messages, currentConversationId, saveConversationMeta])
 
   // Ensure we have a conversation id when user starts chatting
   useEffect(() => {
     if (hasStarted && !currentConversationId) {
       // create a new conversation and attach current messages
       const id = 'c-' + Date.now()
-      const conv = { id, title: messages.find((m: any) => m.role === 'user')?.text?.slice(0,60) || 'Conversation', lastUpdated: new Date().toISOString(), messages: messages || [], topics: [] }
+      const conv = { id, title: messages.find((m: any) => (m as any).role === 'user')?.text?.slice(0,60) || 'Conversation', lastUpdated: new Date().toISOString(), messages: messages || [], topics: [] }
       setConversations((c) => [conv, ...c])
       setCurrentConversationId(id)
     }
-  }, [hasStarted, currentConversationId, messages])
+    // intentionally only depending on hasStarted, currentConversationId and messages length
+  }, [hasStarted, currentConversationId, messages.length])
 
   // Prevent the browser window from scrolling while dashboard is mounted.
   useEffect(() => {
@@ -119,7 +129,7 @@ export default function Dashboard() {
     const conv = {
       id: newId,
       title:
-        preserved.title || preserved.messages?.find((m: any) => m.role === 'user')?.text?.slice(0, 60) || 'Conversation',
+        preserved.title || preserved.messages?.find((m: any) => (m as any).role === 'user')?.text?.slice(0, 60) || 'Conversation',
       lastUpdated: new Date().toISOString(),
       messages: preserved.messages || [],
       topics: [] as string[],
@@ -137,46 +147,13 @@ export default function Dashboard() {
     } catch (e) { }
   }, [isAuthenticated, preservedConversation, setPreservedConversation, endGuestSession, toast])
 
-  // compute portal rect so the fixed input aligns with the main content area
-  useEffect(() => {
-    function compute() {
-      try {
-        const el = mainRef.current
-        if (!el) {
-          setPortalRect(null)
-          return
-        }
-        const r = el.getBoundingClientRect()
-        setPortalRect({ left: r.left, width: r.width })
-      } catch (e) {
-        setPortalRect(null)
-      }
-    }
-
-    compute()
-    window.addEventListener('resize', compute)
-    const obs = new MutationObserver(compute)
-    if (mainRef.current && mainRef.current.parentElement) obs.observe(mainRef.current.parentElement, { attributes: true, childList: true, subtree: true })
-    return () => {
-      window.removeEventListener('resize', compute)
-      try { obs.disconnect() } catch (e) {}
-    }
-  }, [collapsed, rightVisible, activeSection])
+  // No portal: ChatInput is rendered inside the dashboard layout (DashboardView)
 
   return (
     <main className="h-screen bg-background text-foreground overflow-hidden">
       <section className="max-w-7xl mx-auto px-6 py-6 h-full">
         {/* Guest banner (shown for temporary guest sessions) */}
-        <GuestBanner onRequestAuth={(mode) => {
-          // preserve the current conversation/messages in guest context before opening auth
-          setPreservedConversation({ id: currentConversationId ?? undefined, title: conversations.find(c => c.id === currentConversationId)?.title || undefined, messages: messages })
-          try {
-            setAuthMode(mode)
-            open()
-          } catch (e) {
-            // no-op
-          }
-        }} />
+        <GuestBanner onRequestAuth={handleRequestAuth} />
 
         {/* If user completes mock auth and there is a preserved conversation, restore it */}
         {/* Restoration runs in an effect below */}
@@ -188,85 +165,46 @@ export default function Dashboard() {
            * rightSpan: 0 when hidden, otherwise 2 when collapsed or 3 when expanded
            * mainSpan: remaining columns
            */}
-          {(() => {
-            const sidebarSpan = collapsed ? 2 : 3
-            const rightSpan = rightVisible ? (collapsed ? 2 : 3) : 0
-            const mainSpan = 12 - sidebarSpan - rightSpan
+          {useMemo(() => {
+            const sidebar = (
+              <div className={`shrink-0 transition-all duration-200 ease-in-out ${collapsed ? 'w-18' : 'w-60'}`}>
+                <Sidebar activeSection={activeSection} onSelect={setActiveSection} collapsed={collapsed} setCollapsed={setCollapsed} onNewConversation={newConversation} />
+              </div>
+            )
 
-            // map spans to literal class names so Tailwind sees them
-            const sidebarClass = collapsed ? 'lg:col-span-2' : 'lg:col-span-3'
-            const rightClass = rightVisible ? (collapsed ? 'lg:col-span-2' : 'lg:col-span-3') : ''
-            // main span depends on both collapsed and rightVisible
-            const mainClass = collapsed
-              ? rightVisible
-                ? 'lg:col-span-8' // sidebar 2 + right 2
-                : 'lg:col-span-10' // sidebar 2 + right 0
-              : rightVisible
-              ? 'lg:col-span-6' // sidebar 3 + right 3
-              : 'lg:col-span-9' // sidebar 3 + right 0
+            const main = (
+              <div ref={mainRef} className={`flex-1 min-h-0`}>
+                <MainContent
+                  activeSection={activeSection}
+                  messages={messages}
+                  setMessages={setMessages}
+                  hasStarted={hasStarted}
+                  setHasStarted={setHasStarted}
+                  conversations={conversations}
+                  onOpenConversation={loadConversation}
+                  onNewConversation={newConversation}
+                />
+              </div>
+            )
+
+            const right = rightVisible && activeSection !== 'dashboard' ? (
+              <div className="hidden lg:block shrink-0 w-72 transition-all duration-200 ease-in-out">
+                <RightPanel activeSection={activeSection} onClose={() => setRightVisible(false)} />
+              </div>
+            ) : null
 
             return (
               <>
-                {/* Left sidebar */}
-                <div className={`shrink-0 transition-all duration-200 ease-in-out ${collapsed ? 'w-18' : 'w-60'}`}>
-                  <Sidebar activeSection={activeSection} onSelect={setActiveSection} collapsed={collapsed} setCollapsed={setCollapsed} onNewConversation={newConversation} />
-                </div>
-
-                {/* Main content area (primary) */}
-                <div ref={mainRef} className={`flex-1 min-h-0`}>
-                  <MainContent
-                    activeSection={activeSection}
-                    messages={messages}
-                    setMessages={setMessages}
-                    hasStarted={hasStarted}
-                    setHasStarted={setHasStarted}
-                    conversations={conversations}
-                    onOpenConversation={(id: string) => loadConversation(id)}
-                    onNewConversation={() => newConversation()}
-                  />
-                </div>
-
-                {/* Right insights panel (render only on large screens) */}
-                {rightVisible && activeSection !== 'dashboard' && (
-                  <div className="hidden lg:block shrink-0 w-72 transition-all duration-200 ease-in-out">
-                    <RightPanel activeSection={activeSection} onClose={() => setRightVisible(false)} />
-                  </div>
-                )}
+                {sidebar}
+                {main}
+                {right}
               </>
             )
-          })()}
+          // depend on the minimal set of values that cause re-renders
+          }, [collapsed, activeSection, newConversation, setActiveSection, setCollapsed, messages, setMessages, hasStarted, setHasStarted, conversations, loadConversation, rightVisible])}
         </div>
       </section>
-      {/* Fixed chat input for dashboard — render into document.body via portal so it's
-          not affected by transformed ancestors (avoids clipping/pushing issues) */}
-      {activeSection === 'dashboard' && hasStarted
-        ? createPortal(
-            // position relative to main content bounding rect when available
-            <div
-              className="fixed bottom-4 z-40 pointer-events-auto"
-              style={
-                portalRect
-                  ? { left: portalRect.left + 'px', width: portalRect.width + 'px' }
-                  : { left: 0, right: 0 }
-              }
-            >
-              <div className="px-6">
-                <div>
-                  <ChatInput
-                    onSend={(text: string) => {
-                      try {
-                        window.dispatchEvent(new CustomEvent('dashboard-send', { detail: { text } }))
-                      } catch (e) {
-                        // fallback: nothing
-                      }
-                    }}
-                  />
-                </div>
-              </div>
-            </div>,
-            typeof document !== 'undefined' ? document.body : null,
-          )
-        : null}
+      {/* ChatInput is rendered inside `DashboardView` so no portal is needed. */}
     </main>
   )
 }
