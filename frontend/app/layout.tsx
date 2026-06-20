@@ -1,8 +1,20 @@
 import './globals.css'
+import React from 'react'
+import { AuthProvider } from '@/context/auth-context'
+import { GuestProvider } from '@/context/guest-context'
+import AuthenticationModal from '@/components/auth-modal'
+import GuestModal from '@/components/guest-modal'
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  // This file was converted from a Next.js layout. In a plain React app the
-  // global HTML <head> and <body> are handled in `index.html` and the root
-  // render. Keep this component as a simple wrapper for compatibility.
-  return <>{children}</>
+  // Mount auth/guest providers and their modals so the header/hero buttons
+  // can open dialogs or start guest sessions from anywhere in the app.
+  return (
+    <AuthProvider>
+      <GuestProvider>
+        <AuthenticationModal />
+        <GuestModal />
+        {children}
+      </GuestProvider>
+    </AuthProvider>
+  )
 }
