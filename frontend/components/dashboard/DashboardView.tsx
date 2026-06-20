@@ -78,8 +78,8 @@ export default function DashboardView({
         </div>
       ) : (
         // Conversational workspace
-        <div className="flex flex-col h-full min-h-[70vh]">
-          <div ref={containerRef} className="flex-1 min-h-0 overflow-auto px-6 py-6 space-y-6">
+        <div className="relative flex-1 min-h-[70vh]">
+          <div ref={containerRef} className="absolute inset-0 overflow-auto px-6 pt-6 pb-24 space-y-6">
             {messages.length === 0 ? (
               <div className="p-8 text-center text-muted-foreground">Start the conversation by asking about bills, debates, or members.</div>
             ) : (
@@ -98,7 +98,7 @@ export default function DashboardView({
             )}
           </div>
 
-          <div className="border-t px-6 py-4 bg-background/60">
+          <div className="absolute left-0 right-0 bottom-0 border-t px-6 py-4 bg-background/60 z-20">
             <ChatInput onSend={handleSend} suggestion={suggestion} />
           </div>
         </div>
