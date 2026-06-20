@@ -52,34 +52,7 @@ export default function RightPanel({ activeSection = 'dashboard', onClose }: Pro
           </Card>
         )}
 
-        {/* Parliamentary Activity (closable) */}
-        <Card className="hover:shadow-lg transition-shadow duration-200">
-          <CardHeader className="px-4 py-3 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <BarChart2 />
-              <CardTitle>Parliamentary Activity</CardTitle>
-            </div>
-            <div>
-              <button aria-label="Close panel" onClick={() => onClose && onClose()} className="text-sm text-muted-foreground hover:text-foreground transition-colors">Close</button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-3 gap-3 text-center">
-              <div className="p-3 bg-background rounded-md">
-                <div className="text-2xl font-semibold">24</div>
-                <div className="text-sm text-muted-foreground">Bills Discussed</div>
-              </div>
-              <div className="p-3 bg-background rounded-md">
-                <div className="text-2xl font-semibold">6</div>
-                <div className="text-sm text-muted-foreground">Committees Active</div>
-              </div>
-              <div className="p-3 bg-background rounded-md">
-                <div className="text-2xl font-semibold">112</div>
-                <div className="text-sm text-muted-foreground">Questions Raised</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Parliamentary Activity card removed as requested. */}
 
         {/* Recent Discussions extracted to `RecentDiscussions.tsx` for reuse elsewhere */}
       </div>
