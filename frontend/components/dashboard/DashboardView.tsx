@@ -64,7 +64,7 @@ export default function DashboardView({
       ) : (
         // Conversational workspace
         <div className="relative flex-1 min-h-[70vh]">
-          <div ref={containerRef} className="absolute inset-0 overflow-auto px-6 pt-6 pb-24 space-y-6">
+          <div ref={containerRef} className="absolute inset-0 overflow-auto px-6 pt-6 pb-36 space-y-6">
             {messages.length === 0 ? (
               <div className="p-8 text-center text-muted-foreground">Start the conversation by asking about bills, debates, or members.</div>
             ) : (

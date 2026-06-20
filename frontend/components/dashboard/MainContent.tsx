@@ -50,7 +50,8 @@ export default function MainContent({ activeSection = 'dashboard', messages = []
   useEffect(() => {
     const el = containerRef.current
     if (el) {
-      el.scrollTop = el.scrollHeight
+      // ensure bottom-most content is visible but account for the container height
+      el.scrollTop = Math.max(0, el.scrollHeight - el.clientHeight)
     }
   }, [messages])
 

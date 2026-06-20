@@ -197,7 +197,7 @@ export default function Dashboard() {
                 </div>
 
                 {/* Right insights panel (render only on large screens) */}
-                {rightVisible && (
+                {rightVisible && activeSection !== 'dashboard' && (
                   <div className="hidden lg:block shrink-0 w-72 transition-all duration-200 ease-in-out">
                     <RightPanel activeSection={activeSection} onClose={() => setRightVisible(false)} />
                   </div>
