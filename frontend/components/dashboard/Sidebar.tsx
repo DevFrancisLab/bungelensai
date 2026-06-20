@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { useAuthModal } from '@/context/auth-context'
 import { useGuestModal } from '@/context/guest-context'
+import { useAuth } from '../../src/auth/AuthContext'
 
 type Props = {
   activeSection: 'dashboard' | 'trending' | 'upload' | 'history' | 'settings'
@@ -37,6 +38,57 @@ function Sidebar({ activeSection, onSelect, collapsed = false, setCollapsed }: P
   // auth + guest helpers for profile actions
   const auth = useAuthModal()
   const guest = useGuestModal()
+  const { user, logout } = useAuth()
+
+  function getInitials(u: any) {
+    if (!u) return 'U'
+    // Prefer first/last name initials
+    const first = (u.first_name || u.name || '').toString().trim()
+    const last = (u.last_name || '').toString().trim()
+    if (first && last) return `${first.charAt(0)}${last.charAt(0)}`.toUpperCase()
+    if (first) {
+      const parts = first.split(' ').filter(Boolean)
+      if (parts.length >= 2) return `${parts[0].charAt(0)}${parts[parts.length - 1].charAt(0)}`.toUpperCase()
+      return `${first.charAt(0)}`.toUpperCase()
+    }
+    // fallback to email local-part first+last char
+    const email = (u.email || '').toString()
+    const local = email.split('@')[0] || email
+    if (local.length >= 2) return `${local.charAt(0)}${local.charAt(local.length - 1)}`.toUpperCase()
+    return (email.charAt(0) || 'U').toUpperCase()
+  }
+
+  function getDisplayName(u: any) {
+    if (!u) return 'You'
+    const first = (u.first_name || u.name || '').toString().trim()
+    const last = (u.last_name || '').toString().trim()
+    if (first && last) return `${first} ${last}`
+    if (first) return first.split(' ')[0]
+    if (u.email) return u.email.split('@')[0]
+    return 'You'
+  }
+
+  // Try to recover a minimal user object from stored access token when `user` is not yet populated.
+  function getUserFromToken() {
+    if (typeof window === 'undefined') return null
+    try {
+      const token = localStorage.getItem('accessToken')
+      if (!token) return null
+      const parts = token.split('.')
+      if (parts.length < 2) return null
+      const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')))
+      // Common claim names: email, username
+      const email = payload.email || payload.username || null
+      if (email) return { email }
+      // fallback to user_id if present
+      if (payload.user_id) return { id: payload.user_id }
+      return null
+    } catch (e) {
+      return null
+    }
+  }
+
+  const displayUser = user || getUserFromToken()
 
   function toggle() {
     if (controlled) setCollapsed && setCollapsed((s) => !s)
@@ -123,33 +175,37 @@ function Sidebar({ activeSection, onSelect, collapsed = false, setCollapsed }: P
                     className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'justify-start'} gap-3 text-foreground px-3 py-2 rounded-md transition-all duration-200 ease-in-out border border-accent/10 hover:bg-accent/10 focus-visible:ring-2 focus-visible:ring-accent/40`}
                   >
                     <Avatar className="w-9 h-9">
-                      <AvatarFallback>U</AvatarFallback>
+                      <AvatarFallback>{getInitials(displayUser)}</AvatarFallback>
                     </Avatar>
                     {!isCollapsed && (
                       <div className="flex flex-col items-start">
-                        <span className="text-sm font-medium">You</span>
+                        <span className="text-sm font-medium">{getDisplayName(displayUser)}</span>
                         <span className="text-xs text-muted-foreground">View profile</span>
                       </div>
                     )}
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem onSelect={() => onSelect('settings')}>Settings</DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onSelect={() => {
-                      try {
-                        auth.setAuthenticated(false)
-                      } catch (e) {}
-                      try {
-                        guest.endGuestSession()
-                      } catch (e) {}
-                      try { window.location.href = '/' } catch (e) {}
-                    }}
-                  >
-                    Logout
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem onSelect={() => onSelect('settings')}>Settings</DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onSelect={() => {
+                        try {
+                          // Use global auth logout to clear tokens, user state and axios header
+                          logout && logout()
+                        } catch (e) {}
+                        try {
+                          guest.endGuestSession()
+                        } catch (e) {}
+                        try {
+                          // navigate home after logout
+                          window.location.href = '/'
+                        } catch (e) {}
+                      }}
+                    >
+                      Logout
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
               </DropdownMenu>
             </div>
           )}

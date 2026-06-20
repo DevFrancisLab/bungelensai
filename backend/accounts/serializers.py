@@ -38,8 +38,37 @@ class LoginSerializer(serializers.Serializer):
         password = attrs.get('password')
 
         if email and password:
-            # `authenticate` expects credentials with the USERNAME_FIELD as `username` kwarg
-            user = authenticate(username=email, password=password)
+            # Try authenticating robustly:
+            # 1) Prefer passing `request` if available (some backends need it)
+            # 2) Try authenticating using both `username=` and the user model's USERNAME_FIELD as kwargs
+            request = None
+            try:
+                request = self.context.get('request') if hasattr(self, 'context') else None
+            except Exception:
+                request = None
+
+            user = None
+            # First attempt: pass username= (works with ModelBackend and USERNAME_FIELD)
+            try:
+                if request is not None:
+                    user = authenticate(request=request, username=email, password=password)
+                else:
+                    user = authenticate(username=email, password=password)
+            except Exception:
+                user = None
+
+            # Second attempt: pass the USERNAME_FIELD explicitly (e.g., email=...)
+            if not user:
+                UserModel = get_user_model()
+                username_field = getattr(UserModel, 'USERNAME_FIELD', 'username')
+                try:
+                    auth_kwargs = {username_field: email, 'password': password}
+                    if request is not None:
+                        user = authenticate(request=request, **auth_kwargs)
+                    else:
+                        user = authenticate(**auth_kwargs)
+                except Exception:
+                    user = None
             if not user:
                 raise serializers.ValidationError('Unable to log in with provided credentials.', code='authorization')
             if not user.is_active:

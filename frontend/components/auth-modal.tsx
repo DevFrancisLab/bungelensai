@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAuthModal } from '@/context/auth-context'
+import { useAuth } from '../src/auth/AuthContext'
 import { useGuestModal } from '@/context/guest-context'
 import { Spinner } from '@/components/ui/spinner'
 import { Eye, EyeOff } from 'lucide-react'
@@ -22,6 +23,7 @@ export default function AuthenticationModal() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const navigate = useNavigate()
+  const { login: doLogin, register: doRegister } = useAuth()
 
   function navigateToDashboard() {
     try {
@@ -44,11 +46,27 @@ export default function AuthenticationModal() {
     // simulate a short processing delay
     await new Promise((r) => setTimeout(r, 500))
 
-    setLoading(false)
-    // mark as authenticated (mock)
-    try { setAuthenticated(true) } catch (e) { }
-    close()
-    navigateToDashboard()
+    try {
+      const res = await doLogin(email, password)
+      setLoading(false)
+      // AuthContext will store tokens/user globally. Close modal and navigate.
+      close()
+      navigateToDashboard()
+    } catch (err: any) {
+      setLoading(false)
+      const resp = err?.response?.data
+      let msg = 'Sign in failed.'
+      if (resp) {
+        if (typeof resp === 'string') msg = resp
+        else if (resp.detail) msg = resp.detail
+        else if (typeof resp === 'object') {
+          msg = Object.entries(resp)
+            .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(', ') : v}`)
+            .join(' | ')
+        }
+      } else if (err?.message) msg = err.message
+      setError(String(msg))
+    }
   }
 
   async function handleCreateAccount() {
@@ -63,11 +81,26 @@ export default function AuthenticationModal() {
       return
     }
     setLoading(true)
-    await new Promise((r) => setTimeout(r, 500))
-    setLoading(false)
-    try { setAuthenticated(true) } catch (e) { }
-    close()
-    navigateToDashboard()
+    try {
+      const res = await doRegister(email, password)
+      setLoading(false)
+      close()
+      navigateToDashboard()
+    } catch (err: any) {
+      setLoading(false)
+      const resp = err?.response?.data
+      let msg = 'Unable to create account.'
+      if (resp) {
+        if (typeof resp === 'string') msg = resp
+        else if (resp.detail) msg = resp.detail
+        else if (typeof resp === 'object') {
+          msg = Object.entries(resp)
+            .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(', ') : v}`)
+            .join(' | ')
+        }
+      } else if (err?.message) msg = err.message
+      setError(String(msg))
+    }
   }
 
   return (

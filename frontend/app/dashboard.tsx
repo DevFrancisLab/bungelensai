@@ -7,13 +7,15 @@ import RightPanel from '@/components/dashboard/RightPanel'
 import GuestBanner from '@/components/guest-banner'
 import { useGuestModal } from '@/context/guest-context'
 import { useAuthModal } from '@/context/auth-context'
+import { useAuth } from '../src/auth/AuthContext'
 import { useToast } from '@/hooks/use-toast'
 
 export type SectionKey = 'dashboard' | 'trending' | 'upload' | 'history' | 'settings'
 
 export default function Dashboard() {
   const { preservedConversation, setPreservedConversation, endGuestSession } = useGuestModal()
-  const { isAuthenticated, setAuthMode, open } = useAuthModal()
+  const { isAuthenticated } = useAuth()
+  const { setAuthMode, open } = useAuthModal()
   const { toast } = useToast()
 
   const [activeSection, setActiveSection] = useState<SectionKey>('dashboard')
@@ -122,29 +124,30 @@ export default function Dashboard() {
   // When the user authenticates (mock), restore any preserved conversation saved before auth
   useEffect(() => {
     if (!isAuthenticated) return
-    if (!preservedConversation) return
 
-    const preserved = preservedConversation
-    const newId = preserved.id ?? 'c-' + Date.now()
-    const conv = {
-      id: newId,
-      title:
-        preserved.title || preserved.messages?.find((m: any) => (m as any).role === 'user')?.text?.slice(0, 60) || 'Conversation',
-      lastUpdated: new Date().toISOString(),
-      messages: preserved.messages || [],
-      topics: [] as string[],
+    // If there was a preserved conversation from a guest session, restore it.
+    if (preservedConversation) {
+      const preserved = preservedConversation
+      const newId = preserved.id ?? 'c-' + Date.now()
+      const conv = {
+        id: newId,
+        title:
+          preserved.title || preserved.messages?.find((m: any) => (m as any).role === 'user')?.text?.slice(0, 60) || 'Conversation',
+        lastUpdated: new Date().toISOString(),
+        messages: preserved.messages || [],
+        topics: [] as string[],
+      }
+
+      setConversations((c) => [conv, ...c])
+      setCurrentConversationId(newId)
+      setMessages(conv.messages)
+      // clear preserved conversation
+      setPreservedConversation(null)
+      try { toast({ title: 'Your conversation is now associated with your account.' }) } catch (e) { }
     }
 
-    setConversations((c) => [conv, ...c])
-    setCurrentConversationId(newId)
-    setMessages(conv.messages)
-    // clear preserved conversation and end guest mode
-    setPreservedConversation(null)
+    // In any case, make sure any guest session is ended when the user authenticates
     try { endGuestSession() } catch (e) { }
-
-    try {
-      toast({ title: 'Your conversation is now associated with your account.' })
-    } catch (e) { }
   }, [isAuthenticated, preservedConversation, setPreservedConversation, endGuestSession, toast])
 
   // No portal: ChatInput is rendered inside the dashboard layout (DashboardView)
