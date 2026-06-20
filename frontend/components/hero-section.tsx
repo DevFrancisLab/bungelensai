@@ -4,7 +4,15 @@ import { Button } from '@/components/ui/button'
 import { useGuestModal } from '@/context/guest-context'
 
 export default function HeroSection() {
-  const { open: openGuest } = useGuestModal()
+  const { startGuestSession } = useGuestModal()
+  function navigateToDashboard() {
+    try {
+      window.history.pushState({}, '', '/dashboard')
+      window.dispatchEvent(new PopStateEvent('popstate'))
+    } catch (e) {
+      window.location.href = '/dashboard'
+    }
+  }
   return (
     <section className="relative min-h-screen w-full pt-20 flex items-center justify-center overflow-hidden">
       {/* Background Image with Overlay */}
@@ -37,7 +45,7 @@ export default function HeroSection() {
 
           {/* CTA Buttons */}
           <div className="flex justify-center">
-            <Button size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90 rounded-full px-8 text-base font-semibold shadow-sm hover:shadow-md transition-shadow focus-visible:ring-2" onClick={openGuest} aria-haspopup="dialog">
+            <Button size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90 rounded-full px-8 text-base font-semibold shadow-sm hover:shadow-md transition-shadow focus-visible:ring-2" onClick={() => { startGuestSession(); navigateToDashboard() }} aria-haspopup="dialog">
               Try BungeLens
             </Button>
           </div>

@@ -7,7 +7,7 @@ import { useGuestModal } from '@/context/guest-context'
 
 export default function Header() {
   const { open } = useAuthModal()
-  const { open: guestOpen } = useGuestModal()
+  const { startGuestSession } = useGuestModal()
   // Avoid importing `next/navigation` under Vite; determine pathname from window
   const [scrolled, setScrolled] = useState<boolean>(false)
 
@@ -23,6 +23,15 @@ export default function Header() {
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
+
+  function navigateToDashboard() {
+    try {
+      window.history.pushState({}, '', '/dashboard')
+      window.dispatchEvent(new PopStateEvent('popstate'))
+    } catch (e) {
+      window.location.href = '/dashboard'
+    }
+  }
 
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-200 ${scrolled ? 'bg-background/80 backdrop-blur-md border-b border-border' : 'bg-transparent'}`}>
@@ -40,7 +49,7 @@ export default function Header() {
           <Button variant="ghost" className="text-foreground hover:bg-muted" onClick={open} aria-haspopup="dialog">
             Sign In
           </Button>
-          <Button className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => guestOpen()} aria-haspopup="dialog">
+          <Button className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => { startGuestSession(); navigateToDashboard() }} aria-haspopup="dialog">
             Try BungeLens
           </Button>
         </div>
