@@ -3,7 +3,16 @@
 import React, { useState, useEffect } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { MessageSquare, TrendingUp, Upload, Bookmark, Settings, ChevronLeft, ChevronRight } from 'lucide-react'
+import { MessageSquare, TrendingUp, Upload, Bookmark, ChevronLeft, ChevronRight } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu'
+import { useAuthModal } from '@/context/auth-context'
+import { useGuestModal } from '@/context/guest-context'
 
 type Props = {
   activeSection: 'dashboard' | 'trending' | 'upload' | 'history' | 'settings'
@@ -24,6 +33,10 @@ function Sidebar({ activeSection, onSelect, collapsed = false, setCollapsed }: P
   }, [collapsed, controlled])
 
   const isCollapsed = controlled ? collapsed : internalCollapsed
+
+  // auth + guest helpers for profile actions
+  const auth = useAuthModal()
+  const guest = useGuestModal()
 
   function toggle() {
     if (controlled) setCollapsed && setCollapsed((s) => !s)
@@ -57,7 +70,6 @@ function Sidebar({ activeSection, onSelect, collapsed = false, setCollapsed }: P
               { key: 'trending', label: 'Trending Topics', Icon: TrendingUp },
               { key: 'upload', label: 'Upload Documents', Icon: Upload },
               { key: 'history', label: 'Chat History', Icon: Bookmark },
-              { key: 'settings', label: 'Settings', Icon: Settings },
             ].map((item) => {
               const isActive = activeSection === (item.key as Props['activeSection'])
               return (
@@ -80,17 +92,81 @@ function Sidebar({ activeSection, onSelect, collapsed = false, setCollapsed }: P
           </ul>
         </div>
 
-        {!isCollapsed && (
-          <div className="mt-6">
-            <div className="text-sm font-medium mb-3">My Interests</div>
-            <div className="flex flex-wrap gap-2">
-              <Badge variant="outline">Healthcare</Badge>
-              <Badge variant="outline">Education</Badge>
-              <Badge variant="outline">Youth</Badge>
-              <Badge variant="outline">Employment</Badge>
+        {/* Profile / Interests area - varies by guest state */}
+        <div className="mt-6">
+          {guest.guestActive ? (
+            <div className="mb-4">
+              <button
+                onClick={() => {
+                  try { auth.setAuthMode('signin') } catch (e) {}
+                  try { auth.open() } catch (e) {}
+                }}
+                className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'justify-start'} gap-3 text-foreground px-3 py-2 rounded-md transition-all duration-200 ease-in-out hover:bg-accent/10`}
+              >
+                <Avatar className="w-9 h-9">
+                  <AvatarFallback>G</AvatarFallback>
+                </Avatar>
+                {!isCollapsed && (
+                  <div className="flex flex-col items-start">
+                    <span className="text-sm font-medium">Guest</span>
+                    <span className="text-xs text-muted-foreground">Sign in to save</span>
+                  </div>
+                )}
+              </button>
             </div>
-          </div>
-        )}
+          ) : (
+            <div className="mb-4">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    aria-haspopup="menu"
+                    className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'justify-start'} gap-3 text-foreground px-3 py-2 rounded-md transition-all duration-200 ease-in-out hover:bg-accent/10`}
+                  >
+                    <Avatar className="w-9 h-9">
+                      <AvatarFallback>U</AvatarFallback>
+                    </Avatar>
+                    {!isCollapsed && (
+                      <div className="flex flex-col items-start">
+                        <span className="text-sm font-medium">You</span>
+                        <span className="text-xs text-muted-foreground">View profile</span>
+                      </div>
+                    )}
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem onSelect={() => onSelect('settings')}>Settings</DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onSelect={() => {
+                      try {
+                        auth.setAuthenticated(false)
+                      } catch (e) {}
+                      try {
+                        guest.endGuestSession()
+                      } catch (e) {}
+                      try { window.location.href = '/' } catch (e) {}
+                    }}
+                  >
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          )}
+
+          {/* only show interests when not guest and not collapsed */}
+          {!isCollapsed && !guest.guestActive && (
+            <div>
+              <div className="text-sm font-medium mb-3">My Interests</div>
+              <div className="flex flex-wrap gap-2">
+                <Badge variant="outline">Healthcare</Badge>
+                <Badge variant="outline">Education</Badge>
+                <Badge variant="outline">Youth</Badge>
+                <Badge variant="outline">Employment</Badge>
+              </div>
+            </div>
+          )}
+        </div>
       </nav>
     </aside>
   )
