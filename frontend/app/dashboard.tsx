@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import Sidebar from '@/components/dashboard/Sidebar'
 import MainContent from '@/components/dashboard/MainContent'
 import RightPanel from '@/components/dashboard/RightPanel'
+import ChatInput from '@/components/dashboard/ChatInput'
 import GuestBanner from '@/components/guest-banner'
 import { useGuestModal } from '@/context/guest-context'
 import { useAuthModal } from '@/context/auth-context'
@@ -207,6 +208,22 @@ export default function Dashboard() {
           })()}
         </div>
       </section>
+      {/* Fixed chat input for dashboard — dispatches a global event handled by MainContent */}
+      {activeSection === 'dashboard' && hasStarted ? (
+        <div className="fixed left-0 right-0 bottom-4 z-40 pointer-events-auto">
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="mx-auto">
+              <ChatInput onSend={(text: string) => {
+                try {
+                  window.dispatchEvent(new CustomEvent('dashboard-send', { detail: { text } }))
+                } catch (e) {
+                  // fallback: nothing
+                }
+              }} />
+            </div>
+          </div>
+        </div>
+      ) : null}
     </main>
   )
 }
