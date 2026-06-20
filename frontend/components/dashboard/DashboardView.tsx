@@ -58,22 +58,7 @@ export default function DashboardView({
               <button type="submit" className="ml-2 bg-primary text-primary-foreground px-4 py-2 rounded-full">Ask</button>
             </div>
 
-            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {[
-                'Explain the Finance Bill',
-                "Summarize today's proceedings",
-                'What was discussed about healthcare?',
-                'Show recent education debates',
-              ].map((s) => (
-                <button
-                  key={s}
-                  onClick={() => handleSend(s)}
-                  className="w-full text-left rounded-lg bg-accent/5 hover:bg-accent/10 transition-colors px-4 py-3 text-sm font-medium"
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
+            {/* Landing suggestions removed per UX update */}
           </form>
         </div>
       ) : (
