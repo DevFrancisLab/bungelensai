@@ -48,7 +48,7 @@ function Sidebar({ activeSection, onSelect, collapsed = false, setCollapsed }: P
       <nav
         role="navigation"
         aria-label="Dashboard sidebar"
-        className={`relative w-full flex flex-col justify-between px-3 lg:h-[calc(100vh-6rem)] lg:overflow-auto transition-all duration-200`}
+        className={`relative w-full flex flex-col justify-start gap-y-6 px-3 lg:h-[calc(100vh-6rem)] lg:overflow-auto transition-all duration-200`}
       >
         <div>
           <div className="flex items-center gap-3 mb-6">
@@ -101,7 +101,7 @@ function Sidebar({ activeSection, onSelect, collapsed = false, setCollapsed }: P
                   try { auth.setAuthMode('signin') } catch (e) {}
                   try { auth.open() } catch (e) {}
                 }}
-                className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'justify-start'} gap-3 text-foreground px-3 py-2 rounded-md transition-all duration-200 ease-in-out hover:bg-accent/10`}
+                className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'justify-start'} gap-3 text-foreground px-3 py-2 rounded-md transition-all duration-200 ease-in-out border border-accent/10 hover:bg-accent/10 focus-visible:ring-2 focus-visible:ring-accent/40`}
               >
                 <Avatar className="w-9 h-9">
                   <AvatarFallback>G</AvatarFallback>
@@ -120,7 +120,7 @@ function Sidebar({ activeSection, onSelect, collapsed = false, setCollapsed }: P
                 <DropdownMenuTrigger asChild>
                   <button
                     aria-haspopup="menu"
-                    className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'justify-start'} gap-3 text-foreground px-3 py-2 rounded-md transition-all duration-200 ease-in-out hover:bg-accent/10`}
+                    className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'justify-start'} gap-3 text-foreground px-3 py-2 rounded-md transition-all duration-200 ease-in-out border border-accent/10 hover:bg-accent/10 focus-visible:ring-2 focus-visible:ring-accent/40`}
                   >
                     <Avatar className="w-9 h-9">
                       <AvatarFallback>U</AvatarFallback>
