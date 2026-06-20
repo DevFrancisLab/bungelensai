@@ -9,11 +9,18 @@ import { Label } from '@/components/ui/label'
 import { useAuthModal } from '@/context/auth-context'
 import { useGuestModal } from '@/context/guest-context'
 import { Spinner } from '@/components/ui/spinner'
+import { Eye, EyeOff } from 'lucide-react'
 
 export default function AuthenticationModal() {
   const { isOpen, close, authMode, setAuthenticated } = useAuthModal()
   const { preservedConversation } = useGuestModal()
   const [loading, setLoading] = useState(false)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const navigate = useNavigate()
 
   function navigateToDashboard() {
@@ -27,6 +34,11 @@ export default function AuthenticationModal() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (loading) return
+    setError(null)
+    if (!email || !password) {
+      setError('Please enter email and password.')
+      return
+    }
     setLoading(true)
 
     // simulate a short processing delay
@@ -41,6 +53,15 @@ export default function AuthenticationModal() {
 
   async function handleCreateAccount() {
     if (loading) return
+    setError(null)
+    if (!email || !password || !confirmPassword) {
+      setError('Please fill all fields.')
+      return
+    }
+    if (password !== confirmPassword) {
+      setError('Passwords do not match.')
+      return
+    }
     setLoading(true)
     await new Promise((r) => setTimeout(r, 500))
     setLoading(false)
@@ -63,13 +84,32 @@ export default function AuthenticationModal() {
           <form onSubmit={authMode === 'signup' ? (e) => { e.preventDefault(); handleCreateAccount() } : handleSubmit} className="grid gap-4">
             <div>
               <Label htmlFor="email">Email</Label>
-              <Input id="email" name="email" type="email" placeholder="you@email.com" required aria-required="true" aria-label="Email" />
+              <Input id="email" name="email" type="email" placeholder="you@email.com" required aria-required="true" aria-label="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
             </div>
 
             <div>
               <Label htmlFor="password">Password</Label>
-              <Input id="password" name="password" type="password" placeholder="Enter password" required aria-required="true" aria-label="Password" />
+              <div className="relative">
+                <Input id="password" name="password" type={showPassword ? 'text' : 'password'} placeholder="Enter password" required aria-required="true" aria-label="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="pr-10" />
+                <button type="button" aria-label={showPassword ? 'Hide password' : 'Show password'} onClick={() => setShowPassword((s) => !s)} className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground">
+                  {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                </button>
+              </div>
             </div>
+
+            {authMode === 'signup' && (
+              <div>
+                <Label htmlFor="confirm-password">Confirm Password</Label>
+                <div className="relative">
+                  <Input id="confirm-password" name="confirmPassword" type={showConfirmPassword ? 'text' : 'password'} placeholder="Re-enter password" required aria-required="true" aria-label="Confirm password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="pr-10" />
+                  <button type="button" aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'} onClick={() => setShowConfirmPassword((s) => !s)} className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground">
+                    {showConfirmPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {error ? <div className="text-destructive text-sm">{error}</div> : null}
 
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-1">
               <Button type="submit" className="flex items-center gap-2" disabled={loading} aria-disabled={loading} aria-live="polite">
