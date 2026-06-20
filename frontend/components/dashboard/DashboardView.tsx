@@ -4,6 +4,7 @@ import React from 'react'
 import ChatMessage from './ChatMessage'
 import { Card } from '@/components/ui/card'
 import ChatInput from './ChatInput'
+import { Textarea } from '@/components/ui/textarea'
 
 type Message =
   | { id: string; role: 'user'; text: string }
@@ -30,6 +31,7 @@ export default function DashboardView({
 }) {
   // Landing state input local state
   const [landingValue, setLandingValue] = React.useState('')
+  const landingRef = React.useRef<HTMLTextAreaElement | null>(null)
 
   function submitLanding(e?: React.FormEvent) {
     e?.preventDefault()
@@ -37,6 +39,14 @@ export default function DashboardView({
     if (!text) return
     handleSend(text)
     setLandingValue('')
+    setTimeout(() => landingRef.current?.focus(), 0)
+  }
+
+  function onLandingKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      submitLanding()
+    }
   }
 
   return (
@@ -47,13 +57,16 @@ export default function DashboardView({
           <p className="text-muted-foreground mt-3 max-w-2xl text-center">Understand parliamentary debates, bills and policies in plain language.</p>
 
           <form onSubmit={submitLanding} className="w-full max-w-2xl mt-8">
-            <div className="flex items-center gap-3 bg-background/70 border border-border rounded-full px-4 py-4 shadow-sm">
-              <input
+            <div className="flex items-center gap-3 bg-background/70 border border-border rounded-full px-4 py-3 shadow-sm">
+              <Textarea
+                ref={landingRef}
                 aria-label="Ask BungeLens"
                 placeholder="Ask about a bill, debate or policy..."
                 value={landingValue}
                 onChange={(e) => setLandingValue(e.target.value)}
-                className="bg-transparent flex-1 outline-none text-lg"
+                onKeyDown={onLandingKeyDown}
+                className="bg-transparent flex-1 text-lg resize-none max-h-48 overflow-auto border-0 px-3 py-2 focus-visible:ring-0"
+                rows={2}
               />
               <button type="submit" className="ml-2 bg-primary text-primary-foreground px-4 py-2 rounded-full">Ask</button>
             </div>

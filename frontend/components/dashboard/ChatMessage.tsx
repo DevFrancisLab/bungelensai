@@ -34,11 +34,15 @@ export default function ChatMessage({
         </Avatar>
       </div>
 
-      <div className="flex-1">
-        <Card className={cn(isAssistant ? 'bg-card' : 'bg-primary/5')}>
+      <div className="flex-1 min-w-0">
+        <Card className={cn(isAssistant ? 'bg-card' : 'bg-primary/5', 'min-w-0') }>
           <div className={cn('px-5 py-4')}> 
             {/* User text bubble */}
-            {text && <p className={cn('text-sm md:text-base', isAssistant ? 'text-muted-foreground' : 'text-foreground')}>{text}</p>}
+            {text && (
+              <p className={cn('text-sm md:text-base whitespace-pre-wrap break-words break-all max-w-full', isAssistant ? 'text-muted-foreground' : 'text-foreground')}>
+                {text}
+              </p>
+            )}
 
             {/* Typing indicator */}
             {typing && (
@@ -53,7 +57,7 @@ export default function ChatMessage({
               <div className="mt-4 space-y-4">
                 <div>
                   <div className="font-semibold">Summary</div>
-                  <p className="text-sm md:text-base text-muted-foreground mt-1">{aiResponse.summary}</p>
+                  <p className="text-sm md:text-base text-muted-foreground mt-1 whitespace-pre-wrap break-words break-all max-w-full">{aiResponse.summary}</p>
                 </div>
 
                 <div>
@@ -67,7 +71,7 @@ export default function ChatMessage({
 
                 <div>
                   <div className="font-semibold">Citizen Impact</div>
-                  <p className="text-sm text-muted-foreground mt-1">{aiResponse.citizenImpact}</p>
+                  <p className="text-sm text-muted-foreground mt-1 whitespace-pre-wrap break-words break-all max-w-full">{aiResponse.citizenImpact}</p>
                 </div>
 
                 <div className="flex flex-wrap gap-2">
